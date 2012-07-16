@@ -76,5 +76,23 @@
     "rabbitmq_password": "",
     "rabbitmq_exchange": "bddtask",
     "rabbitmq_channel": "task.1"
+  },
+  "cluster_configuration": {
+    "hadoop": {
+      "core-site.xml": {
+      },
+      "hdfs-site.xml": {
+        "dfs.replication": 2
+      },
+      "mapred-site.xml": {
+        "mapred.map.tasks": 3
+      },
+      "hadoop-env.sh": {
+        "JAVA_HOME": "/usr/java/default"
+      },
+      "log4j.properties": {
+        "hadoop.root.logger": "DEBUG,console"
+      }
+    }
   }
 }
