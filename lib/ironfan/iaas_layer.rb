@@ -24,12 +24,18 @@ module Ironfan
       @@connection_desc = description
     end
 
+    def self.cluster_spec
+      @@connection_desc
+    end
+
     def initialize
       @connection_desc = @@connection_desc
 
       @servers = Servers.new(self)
 
-      Serengeti::CloudManager::Manager.set_log_level(Chef::Log.level)
+      level = Chef::Log.level.to_s
+      level = 'warning' if 'warn' == level
+      Serengeti::CloudManager::Manager.set_log_level(level)
     end
 
     def create_cluster
