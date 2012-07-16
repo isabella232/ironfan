@@ -1,22 +1,27 @@
-current_dir   = File.expand_path('~/.chef')
-organization  = 'infochimps'
-username      = 'mrflip'
+log_level     :debug
+log_location  STDOUT
 
-cookbook_root = ENV['PATH_TO_COOKBOOK_REPOS'] || File.expand_path('../../ironfan-homebase', File.dirname(__FILE__))
+chef_dir   = File.expand_path('~/.chef')
+organization  = ENV['CHEF_ORG'] || 'chef'
+username      = ENV['CHEF_USERNAME'] || 'chefuser'
 
-ironfan_path       File.expand_path(cookbook_root + '/../ironfan')
-keypair_path       File.expand_path(current_dir + "/keypairs")
+cookbook_root = ENV['CHEF_COOKBOOK_REPOS'] || File.expand_path('../../ironfan-homebase', File.dirname(__FILE__))
 
-cookbook_path    [
-  "cookbooks", "vendor/vmware/cookbooks"
-  ].map{|path| File.join(cookbook_root, path) }
+ironfan_path    File.expand_path(cookbook_root + '/../ironfan')
+keypair_path    File.expand_path(chef_dir + "/keypairs")
 
-cluster_path     [
-  "spec/data/clusters",
-  ].map{|path| File.join(ironfan_path, path) }
+cookbook_path   [ "cookbooks"].map{|path| File.join(cookbook_root, path) }
+cluster_path    [ "spec/data/clusters" ].map{|path| File.join(ironfan_path, path) }
 
 node_name                username
-validation_client_name   "chef-validator"
+validation_client_name   "#{organization}-validator"
 validation_key           "#{keypair_path}/#{organization}-validator.pem"
 client_key               "#{keypair_path}/#{username}-client_key.pem"
-chef_server_url          "https://api.opscode.com/organizations/#{organization}"
+chef_server_url          ENV['CHEF_SERVER_URL'] || "https://api.opscode.com/organizations/#{organization}"
+
+# Configure Bootstrap
+knife[:ssh_user] = 'serengeti'
+knife[:ssh_password] = 'the_password'
+
+# Configure Monitor #
+knife[:monitor_disabled] = true

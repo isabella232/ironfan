@@ -35,9 +35,33 @@ Spork.prefork do # This code is run only once when the spork server is started
   def load_example_cluster(name)
     require(IRONFAN_DIR('spec/data/clusters', "#{name}.rb"))
   end
+
   def get_example_cluster name
     load_example_cluster(name)
     Ironfan.cluster(name)
+  end
+
+  def initialize_ironfan
+    require IRONFAN_DIR("lib/chef/knife/cluster_create")
+    knife_create = Chef::Knife::ClusterCreate.new
+    knife_create.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
+    knife_create.config[:yes] = true
+    knife_create.config[:verbosity] = 2
+    knife_create.name_args = 'hadoop_cluster_test'
+    knife_create.load_ironfan
+  end
+
+  def create_hadoop_cluster_test
+    initialize_ironfan
+
+    cluster = Ironfan::create_cluster(IRONFAN_DIR('spec/data/cluster_definition.json'), true)
+    cluster.resolve!
+    cluster
+  end
+
+  def get_cluster_configuration
+    json = JSON.parse(File.read(IRONFAN_DIR('spec/data/cluster_definition.json')))
+    json['cluster_configuration']
   end
 
   # Configure rspec
