@@ -26,6 +26,30 @@ module Ironfan
         Ironfan::Vsphere::Server.new(*args)
       end
 
+      protected
+
+      def create_facet_role
+        super
+        save_cluster_configuration
+      end
+
+      # Save cluster configuration into facet role
+      def save_cluster_configuration
+        begin
+          facets = Ironfan::IaasProvider.cluster_spec['cluster_definition']['groups']
+          facet = facets.find { |f| f['name'] == facet_name.to_s }
+          conf = facet[CONF_KEY]
+        rescue
+          nil
+        end
+
+        conf ||= {}
+        if conf
+          @facet_role.default_attributes({ CONF_KEY => conf })
+        end
+        conf
+      end
+
     end
 
   end

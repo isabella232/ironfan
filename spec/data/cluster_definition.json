@@ -49,6 +49,26 @@
         "storage": {
           "type": "shared",
           "size": 20
+        },
+        "cluster_configuration": {
+          "hadoop": {
+            "core-site.xml" : {
+              "sample.test.int": 4,
+              "sample.test.string": "facet_client"
+            },
+            "hdfs-site.xml" : {
+              "dfs.replication": 4
+            },
+            "mapred-site.xml" : {
+              "mapred.map.tasks": 4
+            },
+            "hadoop-env.sh" : {
+              "JAVA_HOME": "/usr/java/latest"
+            },
+            "log4j.properties" : {
+              "hadoop.root.logger": "DEBUG,console"
+            }
+          }
         }
       }
     ]
@@ -80,9 +100,11 @@
   "cluster_configuration": {
     "hadoop": {
       "core-site.xml": {
+        "sample.test.int": 3,
+        "sample.test.string": "cluster"
       },
       "hdfs-site.xml": {
-        "dfs.replication": 2
+        "dfs.replication": 3
       },
       "mapred-site.xml": {
         "mapred.map.tasks": 3
@@ -91,7 +113,8 @@
         "JAVA_HOME": "/usr/java/default"
       },
       "log4j.properties": {
-        "hadoop.root.logger": "DEBUG,console"
+        "hadoop.root.logger": "DEBUG,console",
+        "hadoop.security.logger": "ERROR,console"
       }
     }
   }

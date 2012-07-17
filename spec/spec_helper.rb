@@ -64,6 +64,12 @@ Spork.prefork do # This code is run only once when the spork server is started
     json['cluster_configuration']
   end
 
+  def get_facet_configuration(facet_name)
+    json = JSON.parse(File.read(IRONFAN_DIR('spec/data/cluster_definition.json')))
+    facet = json['cluster_definition']['groups'].find { |f| f['name'] == facet_name.to_s }
+    facet['cluster_configuration'] || {}
+  end
+
   # Configure rspec
   RSpec.configure do |config|
   end
