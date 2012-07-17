@@ -258,6 +258,7 @@ module Ironfan
     def bootstrap_cluster(cluster_name, target)
       return if target.empty?
 
+      section("Start bootstrapping machines in cluster #{cluster_name}")
       start_monitor_bootstrap(cluster_name)
       exit_status = []
       target.cluster.facets.each do |name, facet|
@@ -287,17 +288,12 @@ module Ironfan
     end
 
     def bootstrap_server(server)
+      # Test SSH connection
+      unless config[:dry_run]
+        nil until tcp_test_ssh(server.fog_server.ipaddress) { sleep 3 }
+       end
       # Run Bootstrap
-      if config[:bootstrap]
-        # Test SSH connection
-        unless config[:dry_run]
-          nil until tcp_test_ssh(server.fog_server.ipaddress) { sleep 3 }
-        end
-        # Bootstrap
-        run_bootstrap(server, server.fog_server.ipaddress)
-      else
-        return SUCCESS
-      end
+      run_bootstrap(server, server.fog_server.ipaddress)
     end
 
     def tcp_test_ssh(hostname)
