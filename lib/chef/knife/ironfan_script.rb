@@ -54,6 +54,10 @@ module Ironfan
         exit 0
       end
 
+      # Pre-populate information in cloud and chef
+      target.sync_to_cloud
+      target.sync_to_chef
+
       ui.info(["\n", ui.color("Running #{sub_command}", :cyan), " on #{target.joined_names} ..."].join())
       display(target)
 
@@ -64,6 +68,7 @@ module Ironfan
 
       exit_value = perform_execution(target)
 
+      # Sync information to cloud
       target.sync_to_cloud
 
       ui.info("")

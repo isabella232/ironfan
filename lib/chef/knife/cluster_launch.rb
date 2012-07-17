@@ -60,11 +60,6 @@ class Chef
       end
 
       def perform_execution(target)
-        # Pre-populate information in chef
-        section("Sync'ing to chef and cloud")
-        target.sync_to_cloud
-        target.sync_to_chef
-
         # Launch servers
         section("Creating machines in Cloud", :green)
         ret = target.create_servers

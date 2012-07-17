@@ -67,7 +67,7 @@ module Ironfan
   ServerSlice.class_eval do
     include DryRunnable
     def sync_roles
-      step("  syncing cluster and facet roles")
+      step("Syncing cluster and facet roles")
       unless_dry_run do
         chef_roles.each(&:save)
       end
