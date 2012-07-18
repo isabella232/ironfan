@@ -36,16 +36,16 @@ module Ironfan
       # Save cluster configuration into facet role
       def save_cluster_configuration
         begin
-          facets = Ironfan::IaasProvider.cluster_spec['cluster_definition']['groups']
+          facets = Ironfan::IaasProvider.cluster_spec[CLUSTER_DEF_KEY][GROUPS_KEY]
           facet = facets.find { |f| f['name'] == facet_name.to_s }
-          conf = facet[CONF_KEY]
+          conf = facet[CLUSTER_CONF_KEY]
         rescue
           nil
         end
 
         conf ||= {}
         if conf
-          @facet_role.default_attributes({ CONF_KEY => conf })
+          @facet_role.default_attributes({ CLUSTER_CONF_KEY => conf })
         end
         conf
       end

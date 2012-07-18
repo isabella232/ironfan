@@ -20,7 +20,9 @@ require 'ironfan/vsphere/server_slice'
 
 module Ironfan
   module Vsphere
-    CONF_KEY = 'cluster_configuration'
+    CLUSTER_DEF_KEY = 'cluster_definition'
+    GROUPS_KEY = 'groups'
+    CLUSTER_CONF_KEY = 'cluster_configuration'
 
     class Cluster < Ironfan::Cluster
 
@@ -46,10 +48,10 @@ module Ironfan
 
       # Save cluster configuration into cluster role
       def save_cluster_configuration
-        conf = Ironfan::IaasProvider.cluster_spec[CONF_KEY]
+        conf = Ironfan::IaasProvider.cluster_spec[CLUSTER_DEF_KEY][CLUSTER_CONF_KEY]
         conf ||= {}
         if conf
-          @cluster_role.default_attributes({ CONF_KEY => conf })
+          @cluster_role.default_attributes({ CLUSTER_CONF_KEY => conf })
         end
         conf
       end

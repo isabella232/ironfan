@@ -71,7 +71,28 @@
           }
         }
       }
-    ]
+    ],
+    "cluster_configuration": {
+      "hadoop": {
+        "core-site.xml": {
+          "sample.test.int": 3,
+          "sample.test.string": "cluster"
+        },
+        "hdfs-site.xml": {
+          "dfs.replication": 3
+        },
+        "mapred-site.xml": {
+          "mapred.map.tasks": 3
+        },
+        "hadoop-env.sh": {
+          "JAVA_HOME": "/usr/java/default"
+        },
+        "log4j.properties": {
+          "hadoop.root.logger": "DEBUG,console",
+          "hadoop.security.logger": "ERROR,console"
+        }
+      }
+    }
   },
   "cloud_provider": {
     "name": "vsphere",
@@ -96,26 +117,5 @@
     "rabbitmq_password": "",
     "rabbitmq_exchange": "bddtask",
     "rabbitmq_channel": "task.1"
-  },
-  "cluster_configuration": {
-    "hadoop": {
-      "core-site.xml": {
-        "sample.test.int": 3,
-        "sample.test.string": "cluster"
-      },
-      "hdfs-site.xml": {
-        "dfs.replication": 3
-      },
-      "mapred-site.xml": {
-        "mapred.map.tasks": 3
-      },
-      "hadoop-env.sh": {
-        "JAVA_HOME": "/usr/java/default"
-      },
-      "log4j.properties": {
-        "hadoop.root.logger": "DEBUG,console",
-        "hadoop.security.logger": "ERROR,console"
-      }
-    }
   }
 }

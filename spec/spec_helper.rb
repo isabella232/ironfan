@@ -61,7 +61,7 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   def get_cluster_configuration
     json = JSON.parse(File.read(IRONFAN_DIR('spec/data/cluster_definition.json')))
-    json['cluster_configuration']
+    json['cluster_definition']['cluster_configuration']
   end
 
   def get_facet_configuration(facet_name)
