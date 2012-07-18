@@ -185,6 +185,10 @@ module Ironfan
               facet.cloud(cloud_provider_name).image_name value
             when 'instance_num'
               facet.instances value
+            when 'ha'
+              facet.facet_role do
+                override_attributes({ :hadoop => { :ha_enabled => value } })
+              end
             when 'roles'
               value.each do |role|
                 facet.role role
