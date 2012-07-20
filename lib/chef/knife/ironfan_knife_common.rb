@@ -103,7 +103,7 @@ module Ironfan
     end
 
     def cluster_name
-      if @name_args.length > 0
+      if @name_args.length > 1
         return @name_args[0] # when @name_args is [clustername facet index]
       else
         return @name_args[0].split('-')[0] # when @name_args is [clustername-facet-index]
