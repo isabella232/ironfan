@@ -32,8 +32,10 @@ module Ironfan
 
 
     def start_monitor_bootstrap(cluster_name)
+      sleep(10)
       Chef::Log.debug("Initialize monitoring bootstrap progress of cluster #{cluster_name}")
       nodes = cluster_nodes(cluster_name)
+      Chef::Log.debug("#{nodes.size}")
       nodes.each do |node|
         attrs = get_provision_attrs(node)
         attrs[:finished] = false
@@ -49,6 +51,7 @@ module Ironfan
     end
 
     def start_monitor_progess(cluster_name)
+      sleep(10)
       Chef::Log.debug("Initialize monitoring progress of cluster #{cluster_name}")
       nodes = cluster_nodes(cluster_name)
       nodes.each do |node|
