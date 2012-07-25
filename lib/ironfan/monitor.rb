@@ -28,11 +28,8 @@ module Ironfan
 
     # Error Message
     ERROR_BOOTSTAP_FAIL ||= 'Bootstrapping VM failed.'
-    ERROR_CHEF_NODES_NOT_FOUND ||= "Can't find any Chef Nodes belonging to this cluster. The Chef Nodes may haven't been created or have already been deleted."
-
 
     def start_monitor_bootstrap(cluster_name)
-      sleep(10)
       Chef::Log.debug("Initialize monitoring bootstrap progress of cluster #{cluster_name}")
       nodes = cluster_nodes(cluster_name)
       Chef::Log.debug("#{nodes.size}")
@@ -51,7 +48,6 @@ module Ironfan
     end
 
     def start_monitor_progess(cluster_name)
-      sleep(10)
       Chef::Log.debug("Initialize monitoring progress of cluster #{cluster_name}")
       nodes = cluster_nodes(cluster_name)
       nodes.each do |node|
@@ -247,22 +243,11 @@ module Ironfan
     end
 
     def cluster_nodes(cluster_name)
-      # the Chef Search API has some latency to return the newly created Chef Nodes, so we need to wait
-      timeout = 180 # 60 * 3 seconds
-      sleep_interval = 3 # 3 seconds
-
       nodes = []
-      while nodes.empty?
-        Chef::Search::Query.new.search(:node, "cluster_name:#{cluster_name}") do |n|
-          nodes.push(n)
-        end
-        Chef::Log.debug("Chef Nodes for cluster #{cluster_name} returned by Chef Search are : #{nodes}")
-
-        timeout -= sleep_interval
-        raise ERROR_CHEF_NODES_NOT_FOUND if timeout < 0
-
-        sleep(sleep_interval)
+      Chef::Search::Query.new.search(:node, "cluster_name:#{cluster_name}") do |n|
+        nodes.push(n)
       end
+      raise "Can't find any Chef Nodes belonging to cluster #{cluster_name}." if nodes.empty?
       nodes.sort_by! { |n| n.name }
     end
 
@@ -281,18 +266,18 @@ module Ironfan
       groups = cluster[:cluster_data][:groups] = Mash.new
       nodes = cluster_nodes(cluster_name)
       nodes.each do |node|
+        server = get_provision_attrs(node).to_mash
         # create groups
         group = groups[node.facet_name] || Mash.new
         group[:name] ||= node.facet_name
         group[:instances] ||= []
-        group[:instances] << node[:provision].to_hash
+        group[:instances] << server
         groups[node.facet_name] = group
         # create cluster summary
-        server = node[:provision]
         cluster[:success] += 1 if server[:finished] and server[:succeed]
         cluster[:failure] += 1 if server[:finished] and !server[:succeed]
         cluster[:running] += 1 if !server[:finished]
-        cluster[:progress] += server[:progress]
+        cluster[:progress] += server[:progress] || 0
       end
       cluster[:total] = nodes.length
       cluster[:progress] /= cluster[:total] if cluster[:total] != 0

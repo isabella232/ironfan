@@ -138,6 +138,7 @@ module Ironfan
     def sync_to_chef
       sync_roles
       delegate_to_servers( :sync_to_chef )
+      ensure_all_chef_nodes
     end
 
     #
