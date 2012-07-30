@@ -187,7 +187,7 @@ module Ironfan
               facet.instances value
             when 'ha'
               facet.facet_role do
-                override_attributes({ :hadoop => { :ha_enabled => value } })
+                override_attributes({ :hadoop => { :ha_enabled => ['on','ft'].include?(value) } })
               end
             when 'roles'
               value.each do |role|
