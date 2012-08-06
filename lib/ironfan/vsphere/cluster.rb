@@ -44,16 +44,22 @@ module Ironfan
       def create_cluster_role
         super
         save_cluster_configuration
+        save_package_repo_configuration
       end
 
       # Save cluster configuration into cluster role
       def save_cluster_configuration
         conf = Ironfan::IaasProvider.cluster_spec[CLUSTER_DEF_KEY][CLUSTER_CONF_KEY]
         conf ||= {}
-        if conf
-          @cluster_role.default_attributes({ CLUSTER_CONF_KEY => conf })
-        end
-        conf
+        @cluster_role.default_attributes({ CLUSTER_CONF_KEY => conf })
+      end
+
+      # Save package repository info (e.g. yum, apt) into cluster role
+      def save_package_repo_configuration
+        conf = {}
+        conf[:disable_external_yum_repo] = Chef::Config[:knife][:disable_external_yum_repo]
+        conf[:yum_repos] = Chef::Config[:knife][:yum_repos]
+        @cluster_role.default_attributes.merge!(conf)
       end
     end
   end
