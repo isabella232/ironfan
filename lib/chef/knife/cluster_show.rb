@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-require File.expand_path('ironfan_knife_common', File.dirname(__FILE__))
+require File.expand_path('ironfan_script', File.dirname(__FILE__))
 
 class Chef
   class Knife
