@@ -59,7 +59,7 @@ class Chef
           die('Deleting Chef Nodes of cluster failed. Abort!', DELETE_FAILURE) if !ret
         end
 
-        section("Deleting cluster completed.")
+        section("Deleting cluster #{target_name} completed.")
         ret
       end
 

@@ -23,9 +23,9 @@ module Ironfan
   class ServerSlice < Ironfan::DslObject
     attr_reader :name, :servers, :cluster, :cloud
 
-    def initialize cluster, servers
+    def initialize cluster, servers, slice_name
       super()
-      @name    = "#{cluster.name} slice"
+      @name    = slice_name || cluster.name.to_s
       @cluster = cluster
       @cloud   = cluster.cloud
       @servers = servers
@@ -46,7 +46,7 @@ module Ironfan
     end
     [:select, :find_all, :reject, :detect, :find, :drop_while].each do |method|
       define_method(method) do |*args, &block|
-        self.class.new cluster, @servers.send(method, *args, &block)
+        self.class.new cluster, @servers.send(method, *args, &block), self.name
       end
     end
     # true if slice contains a server with the given fullname (if arg is a

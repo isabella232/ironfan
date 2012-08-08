@@ -85,7 +85,7 @@ module Ironfan
     # @return [Ironfan::ServerSlice] slice containing all servers
     def servers
       svrs = @facets.map{ |name, facet| facet.servers.to_a }
-      Ironfan::ServerSlice.new(self, svrs.flatten)
+      new_slice(self, svrs.flatten, cluster_name)
     end
 
     #
@@ -173,5 +173,8 @@ end
       role(@cluster_role_name, :own)
     end
 
+    def new_slice(parent, servers, slice_name)
+      Ironfan::ServerSlice.new(parent, servers, slice_name)
+    end
   end
 end

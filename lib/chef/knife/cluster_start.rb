@@ -41,7 +41,7 @@ class Chef
       end
 
       def perform_execution(target)
-        section("Starting cluster #{cluster_name}")
+        section("Starting cluster #{target_name}")
         ret = target.start(config[:bootstrap])
         die('Starting cluster failed. Abort!', START_FAILURE) if !ret
 
@@ -50,10 +50,10 @@ class Chef
 
         exit_status = 0
         if config[:bootstrap]
-          exit_status = bootstrap_cluster(cluster_name, target)
+          exit_status = bootstrap_cluster(target_name, target)
         end
 
-        section("Starting cluster completed.")
+        section("Starting cluster #{target_name} completed.")
         return exit_status
       end
     end

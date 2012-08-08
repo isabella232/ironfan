@@ -34,17 +34,16 @@ module Ironfan
         Ironfan::Vsphere::Facet.new(*args)
       end
 
-      def servers
-        svrs = @facets.map{ |name, facet| facet.servers.to_a }
-        Ironfan::Vsphere::ServerSlice.new(self, svrs.flatten)
-      end
-
       protected
 
       def create_cluster_role
         super
         save_cluster_configuration
         save_package_repo_configuration
+      end
+
+      def new_slice(*args)
+        Ironfan::Vsphere::ServerSlice.new(*args)
       end
 
       # Save cluster configuration into cluster role

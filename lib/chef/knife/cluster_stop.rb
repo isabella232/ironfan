@@ -29,14 +29,14 @@ class Chef
       end
 
       def perform_execution(target)
-        section("Stopping cluster #{cluster_name}")
+        section("Stopping cluster #{target_name}")
         ret = super(target)
         die('Stopping cluster failed. Abort!', STOP_FAILURE) if !ret
 
         section("Announcing Chef nodes as stopped")
         target.send(:delegate_to_servers, :announce_as_stopped)
 
-        section("Stopping cluster completed.")
+        section("Stopping cluster #{target_name} completed.")
         ret
       end
 

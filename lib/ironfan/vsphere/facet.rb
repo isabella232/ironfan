@@ -33,6 +33,10 @@ module Ironfan
         save_cluster_configuration
       end
 
+      def new_slice(*args)
+        Ironfan::Vsphere::ServerSlice.new(*args)
+      end
+
       # Save cluster configuration into facet role
       def save_cluster_configuration
         begin

@@ -99,10 +99,11 @@ module Ironfan
     #
     # @return [Ironfan::ServerSlice] the requested slice
     def slice(slice_indexes=nil)
+      slice_name = [cluster_name, facet_name, slice_indexes].compact.join('-')
       slice_indexes = self.indexes if slice_indexes.blank?
       slice_indexes = indexes_from_intervals(slice_indexes) if slice_indexes.is_a?(String)
       svrs = Array(slice_indexes).map(&:to_i).sort!.select{|idx| has_server?(idx) }.map{|idx| server(idx) }
-      Ironfan::ServerSlice.new(self.cluster, svrs)
+      new_slice(self.cluster, svrs.flatten, slice_name)
     end
 
     # all valid server indexes
@@ -130,6 +131,10 @@ module Ironfan
       @facet_role_name = "#{cluster_name}_#{facet_name}"
       @facet_role      = new_chef_role(@facet_role_name, cluster, self)
       role(@facet_role_name, :own)
+    end
+
+    def new_slice(parent, servers, slice_name)
+      Ironfan::ServerSlice.new(parent, servers, slice_name)
     end
 
     #

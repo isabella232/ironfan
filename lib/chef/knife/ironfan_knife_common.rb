@@ -102,6 +102,10 @@ module Ironfan
       end
     end
 
+    def target_name
+      @name_args.length > 1 ? @name_args.join('-') : @name_args[0]
+    end
+
     def cluster_name
       if @name_args.length > 1
         return @name_args[0] # when @name_args is [clustername facet index]
@@ -255,26 +259,28 @@ module Ironfan
       ret
     end
 
-    def bootstrap_cluster(cluster_name, target)
+    def bootstrap_cluster(target_name, target)
       return if target.empty?
 
-      section("Start bootstrapping machines in cluster #{cluster_name}")
-      start_monitor_bootstrap(cluster_name)
+      section("Start bootstrapping machines in cluster #{target_name}")
+      start_monitor_bootstrap(target_name)
       exit_status = []
       target.cluster.facets.each do |name, facet|
+        servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
+        next if servers.empty?
+
         section("Bootstrapping machines in facet #{name}", :green)
-        monitor_thread = Thread.new(cluster_name) do |name|
+        monitor_thread = Thread.new(target_name) do |target_name|
           while true
             sleep(monitor_interval)
-            report_progress(name)
+            report_progress(target_name)
           end
         end
 
-        servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
         # As each server finishes, configure it
         watcher_threads = servers.parallelize do |svr|
           exit_value = bootstrap_server(svr)
-          monitor_bootstrap_progress(svr, exit_value)
+          monitor_bootstrap_progress(target_name, svr, exit_value)
           exit_value
         end
         exit_status += watcher_threads.map{ |t| t.join.value }
@@ -282,7 +288,7 @@ module Ironfan
 
         monitor_thread.exit
       end
-      Chef::Log.debug("Exit status of bootstrapping cluster: #{exit_status.inspect}")
+      ui.info "Bootstrapping cluster #{target_name} completed with exit status #{exit_status.inspect}"
 
       exit_status.select{|i| i != SUCCESS}.empty? ? SUCCESS : BOOTSTRAP_FAILURE
     end
