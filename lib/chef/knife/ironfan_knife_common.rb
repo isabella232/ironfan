@@ -294,10 +294,14 @@ module Ironfan
     end
 
     def bootstrap_server(server)
+      if server.fog_server.ipaddress.to_s.empty?
+        ui.error "#{server.name} doesn't have an IP, will not bootstrap it."
+        return BOOTSTRAP_FAILURE
+      end
       # Test SSH connection
       unless config[:dry_run]
         nil until tcp_test_ssh(server.fog_server.ipaddress) { sleep 3 }
-       end
+      end
       # Run Bootstrap
       run_bootstrap(server, server.fog_server.ipaddress)
     end
