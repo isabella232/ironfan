@@ -184,12 +184,9 @@ module Ironfan
 
       # merge nodes data with cluster definition
       groups = data['cluster_data']['groups']
-      cluster_meta = cloud.fog_connection.connection_desc['cluster_definition']
-      cluster_meta['groups'].each_with_index do |meta_group, i|
-        if !groups[meta_group['name']]
-          cluster_meta['groups'].delete_at(i)
-          next
-        end
+      cluster_meta = cloud.fog_connection.connection_desc['cluster_definition'].dup
+      cluster_meta['groups'].delete_if { |x| !groups[x['name']] }
+      cluster_meta['groups'].each do |meta_group|
         meta_group['instances'] = groups[meta_group['name']]['instances']
       end
       data['cluster_data'].merge!(cluster_meta)
