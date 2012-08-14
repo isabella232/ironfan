@@ -50,7 +50,8 @@ module Ironfan
 
       target = get_relevant_slice(* @name_args)
       if target.empty?
-        ui.info("No nodes to #{sub_command}, exiting")
+        report_refined_result(target, true)
+        ui.info("No nodes need to #{sub_command}, exiting")
         exit 0
       end
 

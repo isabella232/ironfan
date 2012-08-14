@@ -72,7 +72,7 @@ class Chef
         exit_status = 0
         if config[:bootstrap]
           display(target)
-          exit_status = bootstrap_cluster(target_name, target)
+          exit_status = bootstrap_cluster(target)
         end
 
         section("Creating cluster #{target_name} completed.")

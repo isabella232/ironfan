@@ -259,11 +259,11 @@ module Ironfan
       ret
     end
 
-    def bootstrap_cluster(target_name, target)
+    def bootstrap_cluster(target)
       return if target.empty?
-
+      target_name = target.name
       section("Start bootstrapping machines in cluster #{target_name}")
-      start_monitor_bootstrap(target_name)
+      start_monitor_bootstrap(target)
       exit_status = []
       target.cluster.facets.each do |name, facet|
         servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
@@ -273,14 +273,14 @@ module Ironfan
         monitor_thread = Thread.new(target_name) do |target_name|
           while true
             sleep(monitor_interval)
-            report_progress(target_name)
+            report_progress(target)
           end
         end
 
         # As each server finishes, configure it
         watcher_threads = servers.parallelize do |svr|
           exit_value = bootstrap_server(svr)
-          monitor_bootstrap_progress(target_name, svr, exit_value)
+          monitor_bootstrap_progress(target, svr, exit_value)
           exit_value
         end
         exit_status += watcher_threads.map{ |t| t.join.value }

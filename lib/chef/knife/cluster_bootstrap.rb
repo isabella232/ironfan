@@ -64,7 +64,7 @@ class Chef
       end
 
       def perform_execution(target)
-        bootstrap_cluster(target_name, target)
+        bootstrap_cluster(target)
       end
 
       def confirm_execution(target)

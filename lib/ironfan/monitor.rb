@@ -29,9 +29,9 @@ module Ironfan
     # Error Message
     ERROR_BOOTSTAP_FAIL ||= 'Bootstrapping VM failed.'
 
-    def start_monitor_bootstrap(target_name)
-      Chef::Log.debug("Initialize monitoring bootstrap progress of cluster #{target_name}")
-      nodes = cluster_nodes(target_name)
+    def start_monitor_bootstrap(target)
+      Chef::Log.debug("Initialize monitoring bootstrap progress of cluster #{target.name}")
+      nodes = cluster_nodes(target)
       nodes.each do |node|
         attrs = get_provision_attrs(node)
         attrs[:finished] = false
@@ -43,12 +43,12 @@ module Ironfan
         node.save
       end
 
-      report_progress(target_name)
+      report_progress(target)
     end
 
-    def start_monitor_progess(target_name)
-      Chef::Log.debug("Initialize monitoring progress of cluster #{target_name}")
-      nodes = cluster_nodes(target_name)
+    def start_monitor_progess(target)
+      Chef::Log.debug("Initialize monitoring progress of cluster #{target.name}")
+      nodes = cluster_nodes(target)
       nodes.each do |node|
         attrs = get_provision_attrs(node)
         attrs[:finished] = false
@@ -60,9 +60,9 @@ module Ironfan
       end
     end
 
-    def monitor_iaas_action_progress(target_name, progress, is_last_action = false)
+    def monitor_iaas_action_progress(target, progress, is_last_action = false)
       if progress.result.servers.empty? || (progress.finished? and !progress.result.succeed?)
-        report_refined_progress(target_name, progress)
+        report_refined_progress(target, progress)
         return
       end
 
@@ -93,14 +93,14 @@ module Ironfan
       end
 
       if has_progress
-        report_progress(target_name)
+        report_progress(target)
       else
         Chef::Log.debug("skip reporting cluster status since no progress")
       end
     end
 
-    def monitor_bootstrap_progress(target_name, svr, exit_code)
-      Chef::Log.debug("Monitoring bootstrap progress of cluster #{target_name} with data: #{[exit_code, svr]}")
+    def monitor_bootstrap_progress(target, svr, exit_code)
+      Chef::Log.debug("Monitoring bootstrap progress of cluster #{target.name} with data: #{[exit_code, svr]}")
 
       # Save progress data to ChefNode
       node = Chef::Node.load(svr.fullname)
@@ -123,41 +123,41 @@ module Ironfan
       set_provision_attrs(node, attrs)
       node.save
 
-      report_progress(target_name, ERROR_BOOTSTAP_FAIL)
+      report_progress(target, ERROR_BOOTSTAP_FAIL)
     end
 
     # Monitor the progress of cluster creation
-    def monitor_launch_progress(target_name, progress)
-      Chef::Log.debug("Begin reporting progress of launching cluster #{target_name}: #{progress.inspect}")
-      monitor_iaas_action_progress(target_name, progress)
+    def monitor_launch_progress(target, progress)
+      Chef::Log.debug("Begin reporting progress of launching cluster #{target.name}: #{progress.inspect}")
+      monitor_iaas_action_progress(target, progress)
     end
 
     # report progress of deleting cluster to MessageQueue
-    def monitor_delete_progress(target_name, progress)
-      Chef::Log.debug("Begin reporting progress of deleting cluster #{target_name}: #{progress.inspect}")
+    def monitor_delete_progress(target, progress)
+      Chef::Log.debug("Begin reporting progress of deleting cluster #{target.name}: #{progress.inspect}")
       if progress.finished?
         # if not all VMs of the cluster exists in vCenter (e.g. execute 'cluster kill' after 'cluster launch' failed),
         # monitor_iaas_action_progress() won't work, so call report_refined_progress().
-        report_refined_progress(target_name, progress)
+        report_refined_progress(target, progress)
       else
-        monitor_iaas_action_progress(target_name, progress, true)
+        monitor_iaas_action_progress(target, progress, true)
       end
     end
 
     # report progress of stopping cluster to MessageQueue
-    def monitor_stop_progress(target_name, progress)
-      Chef::Log.debug("Begin reporting progress of stopping cluster #{target_name}: #{progress.inspect}")
-      monitor_iaas_action_progress(target_name, progress, true)
+    def monitor_stop_progress(target, progress)
+      Chef::Log.debug("Begin reporting progress of stopping cluster #{target.name}: #{progress.inspect}")
+      monitor_iaas_action_progress(target, progress, true)
     end
 
     # report progress of starting cluster to MessageQueue
-    def monitor_start_progress(target_name, progress, is_last_action)
-      Chef::Log.debug("Begin reporting progress of starting cluster #{target_name}: #{progress.inspect}")
-      monitor_iaas_action_progress(target_name, progress, is_last_action)
+    def monitor_start_progress(target, progress, is_last_action)
+      Chef::Log.debug("Begin reporting progress of starting cluster #{target.name}: #{progress.inspect}")
+      monitor_iaas_action_progress(target, progress, is_last_action)
     end
 
     # report cluster provision progress without VM detail info to MessageQueue
-    def report_refined_progress(target_name, progress)
+    def report_refined_progress(target, progress)
       cluster = Mash.new
       cluster[:progress] = progress.progress
       cluster[:finished] = progress.finished?
@@ -168,7 +168,26 @@ module Ironfan
       cluster[:running] = progress.result.running
       cluster[:error_msg] = progress.result.error_msg
       cluster[:cluster_data] = Mash.new
-      cluster[:cluster_data][:name] = get_cluster_name(target_name)
+      cluster[:cluster_data][:name] = get_cluster_name(target.name)
+
+      data = JSON.parse(cluster.to_json)
+
+      # send to MQ
+      send_to_mq(data)
+    end
+
+    def report_refined_result(target, succeed)
+      cluster = Mash.new
+      cluster[:progress] = 100
+      cluster[:finished] = true
+      cluster[:succeed] = succeed
+      cluster[:total] = target.length
+      cluster[:success] = succeed
+      cluster[:failure] = 0
+      cluster[:running] = 0
+      cluster[:error_msg] = ''
+      cluster[:cluster_data] = Mash.new
+      cluster[:cluster_data][:name] = get_cluster_name(target.name)
 
       data = JSON.parse(cluster.to_json)
 
@@ -177,10 +196,10 @@ module Ironfan
     end
 
     # report cluster provision progress to MessageQueue
-    def report_progress(target_name, error_msg = '')
-      Chef::Log.debug("Begin reporting status of cluster #{target_name}")
+    def report_progress(target, error_msg = '')
+      Chef::Log.debug("Begin reporting status of cluster #{target.name}")
 
-      data = get_cluster_data(target_name, error_msg)
+      data = get_cluster_data(target, error_msg)
 
       # merge nodes data with cluster definition
       groups = data['cluster_data']['groups']
@@ -245,18 +264,20 @@ module Ironfan
       target_name.split('-')[0]
     end
 
-    def cluster_nodes(target_name)
+    def cluster_nodes(target)
+      target_name = target.name
       cluster_name = get_cluster_name(target_name)
       nodes = []
       Chef::Search::Query.new.search(:node, "cluster_name:#{cluster_name}") do |n|
-        nodes.push(n) if n.name.start_with?(target_name)
+        # only return the nodes related to this target
+        nodes.push(n) if n.name.start_with?(target_name) and target.include?(n.name)
       end
       raise "Can't find any Chef Nodes belonging to cluster #{target_name}." if nodes.empty?
       nodes.sort_by! { |n| n.name }
     end
 
     # generate cluster nodes data in JSON format
-    def get_cluster_data(target_name, error_msg)
+    def get_cluster_data(target, error_msg)
       cluster = Mash.new
       cluster[:total] = 0
       cluster[:success] = 0
@@ -268,7 +289,7 @@ module Ironfan
       cluster[:error_msg] = ''
       cluster[:cluster_data] = Mash.new
       groups = cluster[:cluster_data][:groups] = Mash.new
-      nodes = cluster_nodes(target_name)
+      nodes = cluster_nodes(target)
       nodes.each do |node|
         server = get_provision_attrs(node).to_mash
         # create groups
