@@ -146,7 +146,7 @@ module Ironfan
       true
     end
 
-    # creates or updates the chef node.
+    # create, update or delete the chef node.
     #
     # See notes at top of file for why all this jiggery-fuckery
     #
@@ -162,7 +162,13 @@ module Ironfan
       @chef_node = handle_chef_response('404'){ Chef::Node.load( fullname ) }
       # sets @chef_client if it exists
       chef_client
-      #
+
+      if self.bogus?
+        step("  delete this chef node since it's not defined in this cluster")
+        delete_chef
+        return nil
+      end
+
       case
       when    @chef_client  &&    @chef_node  then _update_chef_node # this will fail later if the chef client is in a bad state but whaddayagonnado
       when    @chef_client  && (! @chef_node) then _create_chef_node

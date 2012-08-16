@@ -68,6 +68,8 @@ module Ironfan
 
       has_progress = false
       progress.result.servers.each do |vm|
+        next unless target.include?(vm.name)
+
         # Get VM attributes
         attrs = vm.to_hash
         # when creating VM is done, set the progress to 50%; once bootstrapping VM is done, set the progress to 100%

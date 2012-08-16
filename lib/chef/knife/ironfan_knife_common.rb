@@ -157,6 +157,11 @@ module Ironfan
       server.exists?
     end
 
+    # is valid server ?
+    def valid?(server)
+      relevant?(server) and !server.bogus?
+    end
+
     # override in subclass to confirm risky actions
     def confirm_execution(*args)
       # pass
@@ -175,7 +180,18 @@ module Ironfan
         rel = relevant?(svr)
         { :relevant? => (rel ? "[blue]#{rel}[reset]" : '-' ) }
       end
-      full_target.select{|svr| relevant?(svr) }
+
+      if not full_target.bogus_servers.empty?
+        ui.info("Deleting bogus servers which are not defined in this cluster")
+        full_target.bogus_servers.each(&:sync_to_chef)
+        full_target.bogus_servers.each(&:sync_to_cloud)
+      end
+
+      full_target.select { |svr| valid?(svr) }
+    end
+
+    def get_valid_slice(target)
+      target.select { |svr| valid?(svr) }
     end
 
     # passes target to ClusterSlice#display, will show headings in server slice
