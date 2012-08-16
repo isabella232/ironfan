@@ -1,4 +1,13 @@
-# 3.1.4.serengeti.1: Refactor Ironfan to work with VMware vSphere 5.0 in addition to EC2
+# 3.1.4.serengeti.0.6
+
+* Add support for setting cluster level and facet level cluster configuration in cluster definition json file
+* Report ERROR when bootstrapping a VM with no valid IP
+* Report correct progress when decreasing the instance number
+* Report correct progress when performing actions on a facet or a node
+* Save package repository info (e.g. yum, apt) into cluster role
+* Several bug fix
+
+# 3.1.4.serengeti.0.5: Refactor Ironfan to work with VMware vSphere 5.0 in addition to EC2
 
 * Refactor Ironfan code architecture to support multi cloud providers gracefully.
 * Add full support for vSphere Cloud (i.e. create and manage VMs in VMware vCenter server).
