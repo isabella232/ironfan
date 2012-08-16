@@ -53,14 +53,14 @@
         "cluster_configuration": {
           "hadoop": {
             "core-site.xml" : {
-              "sample.test.int": 4,
+              "sample.test.int": "4",
               "sample.test.string": "facet_client"
             },
             "hdfs-site.xml" : {
-              "dfs.replication": 4
+              "dfs.replication": "4"
             },
             "mapred-site.xml" : {
-              "mapred.map.tasks": 4
+              "mapred.map.tasks": "4"
             },
             "hadoop-env.sh" : {
               "JAVA_HOME": "/usr/java/latest"
@@ -75,21 +75,33 @@
     "cluster_configuration": {
       "hadoop": {
         "core-site.xml": {
-          "sample.test.int": 3,
+          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
+          // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
+          // "io.file.buffer.size": "4096",
+          "sample.test.int": "3",
           "sample.test.string": "cluster"
         },
         "hdfs-site.xml": {
-          "dfs.replication": 3
+          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
+          // "dfs.replication": "3"
         },
         "mapred-site.xml": {
-          "mapred.map.tasks": 3
+          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
+          // "mapred.map.tasks": "3"
         },
         "hadoop-env.sh": {
-          "JAVA_HOME": "/usr/java/default"
+          // "JAVA_HOME": "",
+          // "HADOOP_HEAPSIZE": "",
+          // "HADOOP_NAMENODE_OPTS": "",
+          // "HADOOP_DATANODE_OPTS": "",
+          // "HADOOP_SECONDARYNAMENODE_OPTS": "",
+          // "HADOOP_JOBTRACKER_OPTS": "",
+          // "HADOOP_TASKTRACKER_OPTS": "",
+          // "PATH": "",
         },
         "log4j.properties": {
-          "hadoop.root.logger": "DEBUG,console",
-          "hadoop.security.logger": "ERROR,console"
+          // "hadoop.root.logger": "DEBUG,console",
+          // "hadoop.security.logger": "DEBUG,console",
         }
       }
     }
