@@ -396,6 +396,11 @@ end
 #
 # Override the methods in Chef::Knife::Ssh to return the exit value of SSH command
 #
+# Need to explicitly require 'chef/knife/ssh' to ensure the methods defined here override the original one defined in 'chef/knife/ssh',
+# because occasionally rubygem loads this file before the original 'chef/knife/ssh', then the overridden won't happen.
+#
+require 'chef/knife/ssh'
+
 class Chef
   class Knife
     class Ssh < Knife
