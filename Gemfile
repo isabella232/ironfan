@@ -1,10 +1,10 @@
 source "http://rubygems.org"
 
 gem 'chef',          "~> 0.10.4"
-gem 'fog',           "~> 1.3.1.serengeti.1"
+gem 'fog'
 gem 'formatador',    "~> 0.2.1"
 gem 'gorillib',      "~> 0.1.7"
-gem 'cloud-manager', "~> 0.5.0"
+gem 'cloud-manager'
 
 group :development do
   gem 'bundler',     "~> 1"
