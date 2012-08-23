@@ -124,8 +124,6 @@ module Ironfan
       attrs[:progress] = 100
       set_provision_attrs(node, attrs)
       node.save
-
-      report_progress(target, ERROR_BOOTSTAP_FAIL)
     end
 
     # Monitor the progress of cluster creation
@@ -198,10 +196,10 @@ module Ironfan
     end
 
     # report cluster provision progress to MessageQueue
-    def report_progress(target, error_msg = '')
+    def report_progress(target)
       Chef::Log.debug("Begin reporting status of cluster #{target.name}")
 
-      data = get_cluster_data(target, error_msg)
+      data = get_cluster_data(target)
 
       # merge nodes data with cluster definition
       groups = data['cluster_data']['groups']
@@ -279,7 +277,7 @@ module Ironfan
     end
 
     # generate cluster nodes data in JSON format
-    def get_cluster_data(target, error_msg)
+    def get_cluster_data(target)
       cluster = Mash.new
       cluster[:total] = 0
       cluster[:success] = 0
@@ -310,7 +308,7 @@ module Ironfan
       cluster[:progress] /= cluster[:total] if cluster[:total] != 0
       cluster[:finished] = (cluster[:running] == 0)
       cluster[:succeed] = (cluster[:success] == cluster[:total])
-      cluster[:error_msg] = error_msg if cluster[:finished] and !cluster[:succeed]
+      cluster[:error_msg] = ERROR_BOOTSTAP_FAIL if cluster[:finished] and !cluster[:succeed]
 
       JSON.parse(cluster.to_json) # convert keys from symbol to string
     end

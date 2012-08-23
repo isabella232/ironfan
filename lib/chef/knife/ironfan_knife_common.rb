@@ -303,6 +303,7 @@ module Ironfan
         ## progressbar_for_threads(watcher_threads) # this bar messes up with normal logs
 
         monitor_thread.exit
+        report_progress(target)
       end
       ui.info "Bootstrapping cluster #{target_name} completed with exit status #{exit_status.inspect}"
 
