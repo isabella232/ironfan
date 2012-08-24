@@ -138,7 +138,7 @@ module Ironfan
         ui.warn("Please specify server slices joined by dashes and not separate args:\n\n  knife cluster #{sub_command} #{slice_string}\n\n")
       end
       cluster_name, facet_name, slice_indexes = slice_string.split(/[\s\-]/, 3)
-      ui.info("Inventorying servers in #{predicate_str(cluster_name, facet_name, slice_indexes)}")
+      Chef::Log.info("Inventorying servers in #{predicate_str(cluster_name, facet_name, slice_indexes)}")
       cluster = Ironfan.load_cluster(cluster_name)
       cluster.resolve!
       cluster.discover!
@@ -364,6 +364,11 @@ module Ironfan
     def section(desc, *style)
       style = [:green] if style.empty?
       ui.info(ui.color(desc, *style))
+    end
+
+    def exit_knife(target, exit_status)
+      report_refined_result(target, exit_status == 0)
+      exit exit_status
     end
 
     def die *args

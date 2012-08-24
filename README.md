@@ -23,13 +23,14 @@ RubyGem cloud-manager provides the function for IaaS like cluster management, an
 #### Knife commands for manage a vSphere cluster
 
 You can use the following Ironfan Knife commands to manage a vSphere cluster:
-* knife cluster create cluster_name --yes --bootstrap
-* knife cluster launch cluster_name --yes --bootstrap
-* knife cluster show   cluster_name --yes
-* knife cluster stop   cluster_name --yes
-* knife cluster start  cluster_name --yes --bootstrap
-* knife cluster kill   cluster_name --yes
-* knife cluster bootstrap cluster_name --yes
+* knife cluster create CLUSTER[-FACET[-INDEX]] --yes --bootstrap
+* knife cluster launch CLUSTER[-FACET[-INDEX]] --yes --bootstrap
+* knife cluster show   CLUSTER[-FACET[-INDEX]] --yes
+* knife cluster stop   CLUSTER[-FACET[-INDEX]] --yes
+* knife cluster start  CLUSTER[-FACET[-INDEX]] --yes --bootstrap
+* knife cluster ssh    CLUSTER[-FACET[-INDEX]] --yes "shell_commands"
+* knife cluster kill   CLUSTER[-FACET[-INDEX]] --yes
+* knife cluster bootstrap CLUSTER[-FACET[-INDEX]] --yes
 
 One outstanding change to all these commands (only when executed on a vSphere cluster) requires an additional param '-f /path/to/cluster_definition.json'.
 This param specifies a json file containing the cluster definition and RabbitMQ server configuration (used by Ironfan), and configuration for connecting to vCenter (used by cloud-manager).

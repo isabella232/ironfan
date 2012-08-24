@@ -23,6 +23,7 @@ class Chef
   class Knife
     class ClusterSsh < Chef::Knife::Ssh
       include Ironfan::KnifeCommon
+      import_banner_and_options(Ironfan::Script)
 
       deps do
         Chef::Knife::Ssh.load_deps
@@ -47,6 +48,7 @@ class Chef
 
         config[:attribute]     ||= Chef::Config[:knife][:ssh_address_attribute] || "fqdn"
         config[:ssh_user]      ||= Chef::Config[:knife][:ssh_user]
+        config[:ssh_password]  ||= Chef::Config[:knife][:ssh_password]
         config[:identity_file] ||= target.ssh_identity_file
 
         @action_nodes = target.chef_nodes
@@ -57,7 +59,13 @@ class Chef
           address
         end.compact
 
-        (ui.fatal("No nodes returned from search!"); exit 10) if addresses.nil? || addresses.length == 0
+        # if no commands provided, print all the ip and exit, so the output can be used for other shell scripts
+        if @name_args.length == 1
+          addresses.each { |ip| ui.msg ip }
+          exit_knife(target, 0)
+        end
+
+        (ui.fatal("No VMs to take action on!"); exit 10) if addresses.nil? || addresses.length == 0
 
         session_from_list(addresses)
       end
@@ -107,6 +115,7 @@ class Chef
         end
         session.loop
         notifications.each{|args| print_data(*args) }
+        return notifications.size # empty array means all ssh commands ran successfully
       end
 
       def cssh
@@ -118,20 +127,9 @@ class Chef
         die(banner) if @name_args.empty?
         extend Chef::Mixin::Command
 
-        @longest = 0
-        configure_session
-
-        case @name_args[1]
-        when "interactive"  then interactive
-        when "screen"       then screen
-        when "tmux"         then tmux
-        when "macterm"      then macterm
-        when "cssh"         then cssh
-        else
-          ssh_command(@name_args[1..-1].join(" "))
-        end
-
-        session.close
+        target = get_slice(@name_args[0]).select(&:sshable?)
+        exit_status = super
+        exit_knife(target, exit_status)
       end
 
     end
