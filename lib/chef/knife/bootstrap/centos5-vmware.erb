@@ -22,8 +22,36 @@ mkdir -p /etc/chef
 
 # create tmp directory for bootstrap
 mkdir -p /tmp/knife-bootstrap
-chmod 700 /tmp/knife-bootstrap 
+chmod 700 /tmp/knife-bootstrap
 cd /tmp/knife-bootstrap
+
+## setup password-less ssh login
+# create .ssh directory
+mkdir -p ~/.ssh
+chmod 700 -R ~/.ssh
+if [ ! -f ~/.ssh/authorized_keys ]; then
+  touch ~/.ssh/authorized_keys
+fi
+chmod 640 ~/.ssh/authorized_keys
+chown -R serengeti.serengeti ~/.ssh
+
+# generate ssh key pair
+<%- home_path = `echo $HOME`.strip %>
+<%- unless File.exist?("#{home_path}/.ssh/id_rsa.pub") %>
+<%- system "ssh-keygen -t rsa -N '' -f #{home_path}/.ssh/id_rsa" %>
+<%- end %>
+
+# copy pub_key to authorized_keys
+<%- pub_key = File.read("#{home_path}/.ssh/id_rsa.pub") %>
+if [ `grep -c "<%= pub_key.strip %>" ~/.ssh/authorized_keys` == 0 ]; then
+<%- unless pub_key.nil? && pub_key.empty? %>
+(
+cat <<'EOP'
+<%= pub_key %>
+EOP
+) >> ~/.ssh/authorized_keys
+<%- end %>
+fi
 
 # generate /etc/chef/client.pem
 <%- if @config[:client_key] %>
