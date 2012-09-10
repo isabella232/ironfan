@@ -51,7 +51,7 @@ module Ironfan
       end
 
       def destroy
-	return true if target_empty?
+        return true if target_empty?
         start_monitor_progess(self)
         task = cloud.fog_connection.delete_cluster
         while !task.finished?
@@ -93,10 +93,10 @@ module Ironfan
 
       def target_empty?
         if self.empty? then
-	  report_refined_result(self, true)
+          report_refined_result(self, true)
           return true
         end
-	return false
+        return false
       end
 
     end

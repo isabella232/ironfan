@@ -53,10 +53,13 @@ module Ironfan
     def start_cluster
       Serengeti::CloudManager::Manager.start_cluster(@connection_desc, :wait => false)
     end
+
+    def get_cluster
+      Serengeti::CloudManager::Manager.list_vms_cluster(@connection_desc, :wait => true)
+    end
   end
 
   class IaasCollection
-    
   end
 
   class Servers < IaasCollection
@@ -65,7 +68,7 @@ module Ironfan
     end
 
     def all
-      Serengeti::CloudManager::Manager.list_vms_cluster(@provider.connection_desc)
+      @provider.get_cluster.get_result.servers
     end
   end
 end

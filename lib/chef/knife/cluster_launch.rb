@@ -23,6 +23,7 @@ require File.expand_path('cluster_bootstrap',    File.dirname(__FILE__))
 class Chef
   class Knife
     class ClusterLaunch < Ironfan::Script
+      import_banner_and_options(Ironfan::Script)
 
       deps do
         require 'time'

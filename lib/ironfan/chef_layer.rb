@@ -70,6 +70,7 @@ module Ironfan
     include DryRunnable
     def sync_roles
       step("Syncing cluster and facet roles")
+      cluster.sync_cluster_role
       unless_dry_run do
         chef_roles.each(&:save)
       end

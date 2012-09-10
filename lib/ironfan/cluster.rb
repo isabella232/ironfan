@@ -56,6 +56,10 @@ module Ironfan
       @cluster_role
     end
 
+    # Update the cluster role
+    def sync_cluster_role
+    end
+
     #
     # Retrieve or define the given facet
     #
@@ -173,6 +177,7 @@ end
       role(@cluster_role_name, :own)
     end
 
+    # Create a new server slice
     def new_slice(parent, servers, slice_name)
       Ironfan::ServerSlice.new(parent, servers, slice_name)
     end

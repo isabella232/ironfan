@@ -23,6 +23,7 @@ module Ironfan
     CLUSTER_DEF_KEY = 'cluster_definition'
     GROUPS_KEY = 'groups'
     CLUSTER_CONF_KEY = 'cluster_configuration'
+    RACK_TOPOLOGY_POLICY_KEY = 'rack_topology_policy'
 
     class Cluster < Ironfan::Cluster
 
@@ -32,6 +33,11 @@ module Ironfan
 
       def new_facet(*args)
         Ironfan::Vsphere::Facet.new(*args)
+      end
+
+      def sync_cluster_role
+        super
+        save_rack_topology
       end
 
       protected
@@ -48,7 +54,7 @@ module Ironfan
 
       # Save cluster configuration into cluster role
       def save_cluster_configuration
-        conf = Ironfan::IaasProvider.cluster_spec[CLUSTER_DEF_KEY][CLUSTER_CONF_KEY]
+        conf = cluster_attributes(CLUSTER_CONF_KEY)
         conf ||= {}
         @cluster_role.default_attributes({ CLUSTER_CONF_KEY => conf })
       end
@@ -59,6 +65,45 @@ module Ironfan
         conf[:disable_external_yum_repo] = Chef::Config[:knife][:disable_external_yum_repo]
         conf[:yum_repos] = Chef::Config[:knife][:yum_repos]
         @cluster_role.default_attributes.merge!(conf)
+      end
+
+      # save rack topology used by Hadoop
+      def save_rack_topology
+        topology_policy = cluster_attributes(RACK_TOPOLOGY_POLICY_KEY)
+        topology_policy.upcase! if topology_policy
+        topology_enabled = (topology_policy and topology_policy != 'DEFAULT')
+        topology_hve_enabled = (topology_policy and topology_policy == 'HVE')
+        topology = self.servers.collect do |svr|
+          vm = svr.fog_server
+          next if !vm or !vm.ipaddress or !vm.rack or !vm.physical_host
+          case topology_policy
+          when 'RACK_AS_RACK'
+            "#{vm.ipaddress} /#{vm.rack}"
+          when 'HOST_AS_RACK'
+            "#{vm.ipaddress} /#{vm.physical_host}"
+          when 'HVE'
+            "#{vm.ipaddress} /#{vm.rack}/#{vm.physical_host}"
+          else
+            nil
+          end
+        end
+        topology = topology.join("\n")
+
+        conf = {
+          :hadoop => {
+            :rack_topology => {
+              :enabled => topology_enabled,
+              :hve_enabled => topology_hve_enabled,
+              :data => topology
+            }
+          }
+        }
+        Chef::Log.debug('saving Rack Topology to cluster role: ' + conf.to_s)
+        @cluster_role.default_attributes.merge!(conf)
+      end
+
+      def cluster_attributes(key)
+        Ironfan::IaasProvider.cluster_spec[CLUSTER_DEF_KEY][key] rescue nil
       end
     end
   end
