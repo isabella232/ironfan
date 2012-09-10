@@ -85,5 +85,24 @@ cat <<'EOP'
 EOP
 ) > /etc/chef/first-boot.json
 
+# Generate script for bootstrap node and setting node status
+(
+cat <<'EOP'
+node = Chef::Node.load("<%= @config[:node].name %>")
+# run chef-client
+ret = system("chef-client > /dev/null")
+# set node status
+status = ret ? "Service Ready" : "Bootstrap Failed"
+node.current_normal[:provision][:status] = status
+node.save
+EOP
+) > /etc/chef/bootstrap_node.rb
+
+# Let chef-client run after VM is powered on
+grep "knife exec /etc/chef/bootstrap_node.rb -c /etc/chef/client.rb > /dev/null" /etc/rc.d/rc.local
+if [ $? != 0 ]; then
+  echo "knife exec /etc/chef/bootstrap_node.rb -c /etc/chef/client.rb > /dev/null" >> /etc/rc.d/rc.local
+fi
+
 <%= start_chef %>'
 

@@ -52,6 +52,9 @@ class Chef
 
         # Display same
         display(target)
+
+        # Report cluster data
+        report_cluster_data(target)
       end
     end
   end

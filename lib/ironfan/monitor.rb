@@ -182,7 +182,7 @@ module Ironfan
       cluster[:finished] = true
       cluster[:succeed] = succeed
       cluster[:total] = target.length
-      cluster[:success] = succeed
+      cluster[:success] = target.length
       cluster[:failure] = 0
       cluster[:running] = 0
       cluster[:error_msg] = ''
@@ -311,6 +311,43 @@ module Ironfan
       cluster[:error_msg] = ERROR_BOOTSTAP_FAIL if cluster[:finished] and !cluster[:succeed]
 
       JSON.parse(cluster.to_json) # convert keys from symbol to string
+    end
+
+    def report_cluster_data(target)
+      target.servers.each do |svr|
+        vm = svr.fog_server
+        node = Chef::Node.load(vm.name)
+        set_provision_attrs(node, get_provision_attrs(node).merge!(vm.to_hash.merge!(:status => node.current_normal[:provision][:status]))) if svr.running?
+        set_provision_attrs(node, get_provision_attrs(node).merge!(vm.to_hash.merge!(:status => vm.state))) unless svr.running?
+        node.save
+      end
+
+      cluster = Mash.new
+      cluster[:progress] = 100
+      cluster[:finished] = true
+      cluster[:succeed] = !target.nil? and !target.empty?
+      cluster[:total] = target.length
+      cluster[:success] = target.length
+      cluster[:failure] = 0
+      cluster[:running] = 0
+      cluster[:error_msg] = ''
+      cluster[:cluster_data] = Mash.new
+      groups = cluster[:cluster_data][:groups] = Mash.new
+      nodes = cluster_nodes(target)
+      nodes.each do |node|
+        server = get_provision_attrs(node).to_mash
+        # create groups
+        group = groups[node.facet_name] || Mash.new
+        group[:name] ||= node.facet_name
+        group[:instances] ||= []
+        group[:instances] << server
+        groups[node.facet_name] = group
+      end
+
+      data = JSON.parse(cluster.to_json)
+
+      # send to MQ
+      send_to_mq(data)
     end
 
     protected
