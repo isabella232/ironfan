@@ -276,7 +276,7 @@ module Ironfan
     end
 
     def bootstrap_cluster(target)
-      return if target.empty?
+      return SUCCESS if target.empty?
       target_name = target.name
       section("Start bootstrapping machines in cluster #{target_name}")
       start_monitor_bootstrap(target)

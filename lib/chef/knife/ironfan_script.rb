@@ -68,6 +68,9 @@ module Ironfan
       end
 
       exit_value = perform_execution(target)
+      exit_value = 0 if exit_value == true
+      exit_value = 1 if exit_value == false
+      exit_value = exit_value.select{ |i| i != SUCCESS and i != true }.empty? ? SUCCESS : FAILURE if exit_value.is_a?(Array)
 
       # Sync information to cloud
       target.sync_to_cloud
@@ -77,7 +80,7 @@ module Ironfan
       display(target)
 
       Chef::Log.debug("Exit value of Knife command is: #{exit_value.inspect}")
-      exit_value
+      exit exit_value
     end
 
     def perform_execution(target)
