@@ -71,7 +71,7 @@ module Ironfan
       def save_rack_topology
         topology_policy = cluster_attributes(RACK_TOPOLOGY_POLICY_KEY)
         topology_policy.upcase! if topology_policy
-        topology_enabled = (topology_policy and topology_policy != 'DEFAULT')
+        topology_enabled = (topology_policy and topology_policy != 'NONE')
         topology_hve_enabled = (topology_policy and topology_policy == 'HVE')
         topology = self.servers.collect do |svr|
           vm = svr.fog_server
