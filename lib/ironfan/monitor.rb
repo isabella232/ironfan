@@ -201,14 +201,7 @@ module Ironfan
 
       data = get_cluster_data(target)
 
-      # merge nodes data with cluster definition
-      groups = data['cluster_data']['groups']
-      cluster_meta = cloud.fog_connection.connection_desc['cluster_definition'].dup
-      cluster_meta['groups'].delete_if { |x| !groups[x['name']] }
-      cluster_meta['groups'].each do |meta_group|
-        meta_group['instances'] = groups[meta_group['name']]['instances']
-      end
-      data['cluster_data'].merge!(cluster_meta)
+      merge_nodes_data(data)
 
       # send to MQ
       send_to_mq(data)
@@ -332,6 +325,7 @@ module Ironfan
       cluster[:running] = 0
       cluster[:error_msg] = ''
       cluster[:cluster_data] = Mash.new
+      cluster[:cluster_data][:name] = get_cluster_name(target.name)
       groups = cluster[:cluster_data][:groups] = Mash.new
       nodes = cluster_nodes(target)
       nodes.each do |node|
@@ -346,6 +340,8 @@ module Ironfan
 
       data = JSON.parse(cluster.to_json)
 
+      merge_nodes_data(data)
+
       # send to MQ
       send_to_mq(data)
     end
@@ -358,6 +354,17 @@ module Ironfan
 
     def set_provision_attrs(chef_node, attrs)
       chef_node[:provision] = attrs
+    end
+
+    # merge nodes data with cluster definition
+    def merge_nodes_data(data)
+      groups = data['cluster_data']['groups']
+      cluster_meta = cloud.fog_connection.connection_desc['cluster_definition'].dup
+      cluster_meta['groups'].delete_if { |x| !groups[x['name']] }
+      cluster_meta['groups'].each do |meta_group|
+        meta_group['instances'] = groups[meta_group['name']]['instances']
+      end
+      data['cluster_data'].merge!(cluster_meta)
     end
   end
 end
