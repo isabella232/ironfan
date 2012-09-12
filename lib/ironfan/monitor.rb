@@ -309,9 +309,17 @@ module Ironfan
     def report_cluster_data(target)
       target.servers.each do |svr|
         vm = svr.fog_server
-        node = Chef::Node.load(vm.name)
-        set_provision_attrs(node, get_provision_attrs(node).merge!(vm.to_hash.merge!(:status => node.current_normal[:provision][:status]))) if svr.running?
-        set_provision_attrs(node, get_provision_attrs(node).merge!(vm.to_hash.merge!(:status => vm.state))) unless svr.running?
+
+        node = Chef::Node.load(svr.name.to_s)
+        attrs = vm ? vm.to_hash : {}
+        if vm.nil?
+          attrs[:status] = 'Not Exist'
+        elsif svr.running?
+          attrs.delete(:status)
+        else
+          attrs[:status] = 'Powered Off'
+        end
+        set_provision_attrs(node, get_provision_attrs(node).merge!(attrs))
         node.save
       end
 
