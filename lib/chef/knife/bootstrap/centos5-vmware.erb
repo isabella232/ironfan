@@ -90,7 +90,7 @@ EOP
 cat <<'EOP'
 node = Chef::Node.load("<%= @config[:node].name %>")
 # run chef-client
-ret = system("chef-client > /dev/null")
+ret = system("<%= start_chef %> > /etc/chef/bootstrap_node.log")
 # set node status
 status = ret ? "Service Ready" : "Bootstrap Failed"
 node.current_normal[:provision][:status] = status
@@ -99,10 +99,26 @@ EOP
 ) > /etc/chef/bootstrap_node.rb
 
 # Let chef-client run after VM is powered on
-grep "knife exec /etc/chef/bootstrap_node.rb -c /etc/chef/client.rb > /dev/null" /etc/rc.d/rc.local
+<%- bootstrap_command = "knife exec /etc/chef/bootstrap_node.rb -c /etc/chef/client.rb > /dev/null" %>
+grep "<%= bootstrap_command %>" /etc/rc.d/rc.local > /dev/null
 if [ $? != 0 ]; then
-  echo "knife exec /etc/chef/bootstrap_node.rb -c /etc/chef/client.rb > /dev/null" >> /etc/rc.d/rc.local
+(
+cat <<'EOP'
+ps -ef | grep -v "grep" | grep "chef-client"
+if [ \$? != 0 ]; then
+  <%= bootstrap_command %>
+fi
+EOP
+) >> /etc/rc.d/rc.local
 fi
 
+while [ true ]; do
+  ps -ef | grep -v "grep" | grep "chef-client"
+  if [ $? != 0 ]; then
+    break
+  else
+    sleep 3
+  fi
+done
 <%= start_chef %>'
 

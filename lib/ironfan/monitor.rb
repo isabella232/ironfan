@@ -311,15 +311,13 @@ module Ironfan
         vm = svr.fog_server
 
         node = Chef::Node.load(svr.name.to_s)
-        attrs = vm ? vm.to_hash : {}
+        attrs = vm ? SON.parse(vm.to_json) : {}
         if vm.nil?
-          attrs[:status] = 'Not Exist'
-        elsif svr.running?
-          attrs.delete(:status)
-        else
-          attrs[:status] = 'Powered Off'
+          attrs["status"] = 'Not Exist'
+        elsif !svr.running?
+          attrs["status"] = 'Powered Off'
         end
-        set_provision_attrs(node, get_provision_attrs(node).merge!(attrs))
+        set_provision_attrs(node, get_provision_attrs(node).merge(attrs))
         node.save
       end
 
