@@ -257,57 +257,69 @@ module Ironfan
 
     def run_bootstrap(node, hostname)
       ret = 0
+      nodename = "node #{node.name} (#{hostname})"
       bs = bootstrapper(node, hostname)
       if config[:skip].to_s == 'true'
-        ui.info "Skipping: bootstrap #{hostname} with #{JSON.pretty_generate(bs.config)}"
+        ui.info "Skip bootstrapping #{nodename} with #{JSON.pretty_generate(bs.config)}"
       else
         begin
+          ui.info "Start bootstrapping #{nodename}"
           ret = bs.run
         rescue StandardError => e
-          ui.error "Error thrown when bootstrapping #{hostname} : #{e}"
+          ui.error "Error thrown when bootstrapping #{nodename} : #{e}"
           ui.error e.backtrace.pretty_inspect
           ui.error "Node data is : #{node.pretty_inspect}"
           ret = BOOTSTRAP_FAILURE
         end
       end
 
-      ui.info "Bootstrapping #{hostname} completed with exit status #{ret.to_s}"
+      ui.info "Bootstrapping #{nodename} completed with exit status #{ret.to_s}"
       ret
     end
 
     def bootstrap_cluster(target)
       return SUCCESS if target.empty?
       target_name = target.name
-      section("Start bootstrapping machines in cluster #{target_name}")
+      section("Start bootstrapping nodes in cluster #{target_name}")
       start_monitor_bootstrap(target)
       exit_status = []
-      target.cluster.facets.each do |name, facet|
-        servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
-        next if servers.empty?
 
-        section("Bootstrapping machines in facet #{name}", :green)
-        monitor_thread = Thread.new(target_name) do |target_name|
-          while true
-            sleep(monitor_interval)
-            report_progress(target)
-          end
+      if Chef::Config[:knife][:bootstrap_by_facet]
+        target.cluster.facets.each do |name, facet|
+          servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
+          next if servers.empty?
+          section("Bootstrapping machines in facet #{name}", :green)
+          exit_status += bootstrap_servers(servers)
         end
-
-        # As each server finishes, configure it
-        watcher_threads = servers.parallelize do |svr|
-          exit_value = bootstrap_server(svr)
-          monitor_bootstrap_progress(target, svr, exit_value)
-          exit_value
-        end
-        exit_status += watcher_threads.map{ |t| t.join.value }
-        ## progressbar_for_threads(watcher_threads) # this bar messes up with normal logs
-
-        monitor_thread.exit
-        report_progress(target)
+      else
+        exit_status = bootstrap_servers(target)
       end
-      ui.info "Bootstrapping cluster #{target_name} completed with exit status #{exit_status.inspect}"
 
+      ui.info "Bootstrapping cluster #{target_name} completed with exit status #{exit_status.inspect}"
       exit_status.select{|i| i != SUCCESS}.empty? ? SUCCESS : BOOTSTRAP_FAILURE
+    end
+
+    def bootstrap_servers(target)
+      monitor_thread = Thread.new(target) do |target|
+        while true
+          sleep(monitor_interval)
+          report_progress(target)
+        end
+      end
+
+      # As each server finishes, configure it
+      exit_status = []
+      watcher_threads = target.parallelize do |svr|
+        exit_value = bootstrap_server(svr)
+        monitor_bootstrap_progress(target, svr, exit_value)
+        exit_value
+      end
+      exit_status += watcher_threads.map{ |t| t.join.value }
+      ## progressbar_for_threads(watcher_threads) # this bar messes up with normal logs
+
+      monitor_thread.exit
+      report_progress(target)
+      exit_status
     end
 
     def bootstrap_server(server)
