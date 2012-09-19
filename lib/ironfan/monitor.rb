@@ -311,7 +311,7 @@ module Ironfan
         vm = svr.fog_server
 
         node = Chef::Node.load(svr.name.to_s)
-        attrs = vm ? JSON.parse(vm.to_json) : {}
+        attrs = vm ? JSON.parse(vm.to_hash.to_json) : {}
         attrs.delete("action") unless attrs.empty?
         if vm.nil?
           attrs["status"] = 'Not Exist'
