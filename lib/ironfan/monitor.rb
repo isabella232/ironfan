@@ -314,11 +314,22 @@ module Ironfan
         attrs = vm ? JSON.parse(vm.to_hash.to_json) : {}
         attrs.delete("action") unless attrs.empty?
         if vm.nil?
-          attrs["status"] = 'Not Exist'
+          attrs["status"] = "Not Exist"
+          attrs["ip_address"] = nil
         elsif svr.running?
           attrs.delete("status")
+          if vm.public_ip_address.nil?
+            attrs["status"] = "Powered On"
+          else
+            attrs["status"] = "VM Ready"
+          end
+          if node["provision"]["bootstrapped"]
+            attrs["status"] = "Service Ready"
+          else
+            attrs["status"] = "Bootstrap Failed"
+          end
         else
-          attrs["status"] = 'Powered Off'
+          attrs["status"] = "Powered Off"
         end
         set_provision_attrs(node, get_provision_attrs(node).merge(attrs))
         node.save
