@@ -172,7 +172,7 @@ end
 
     # Creates a chef role named for the cluster
     def create_cluster_role
-      @cluster_role_name = "#{name}_cluster"
+      @cluster_role_name = "#{name}-cluster"
       @cluster_role      = new_chef_role(@cluster_role_name, cluster)
       role(@cluster_role_name, :own)
     end
