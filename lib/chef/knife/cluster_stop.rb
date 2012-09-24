@@ -33,9 +33,6 @@ class Chef
         ret = super(target)
         die('Stopping cluster failed. Abort!', STOP_FAILURE) if !ret
 
-        section("Announcing Chef nodes as stopped")
-        target.send(:delegate_to_servers, :announce_as_stopped)
-
         section("Stopping cluster #{target_name} completed.")
         ret
       end

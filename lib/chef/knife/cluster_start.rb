@@ -45,9 +45,6 @@ class Chef
         ret = target.start(config[:bootstrap])
         die('Starting cluster failed. Abort!', START_FAILURE) if !ret
 
-        section("Announcing Chef nodes as started")
-        target.send(:delegate_to_servers, :announce_as_started)
-
         exit_status = 0
         if config[:bootstrap]
           exit_status = bootstrap_cluster(target)
