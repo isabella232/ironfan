@@ -66,7 +66,7 @@ class Chef
         ret = target.create_servers
         die('Creating cluster VMs failed. Abort!', CREATE_FAILURE) if !ret
 
-        # Sync attached disks info and other info to Chef
+        # Sync vm ip, vm attached disks, vm rack and other info to Chef
         section("Sync'ing to chef after cluster VMs are created")
         target.sync_to_chef
 
