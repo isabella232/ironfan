@@ -279,6 +279,15 @@ module Ironfan
 
     def bootstrap_cluster(target)
       return SUCCESS if target.empty?
+
+      # in case service registry entries are in Chef Nodes, but the service daemon (which is depended by other daemons) is not started yet, e.g.
+      # 1. hadoop namenode daemon is not started yet during a 'cluster start'
+      # 2. hadoop namenode daemon is down before bootstrap the cluster
+      # and hbase master/regionserver daemons require hadoop namenode daemon is running on the same or another VM,
+      # so starting hbase daemons will fail when hadoop namenode daemon is down.
+      # solution is: clear registry entries before bootstrapping cluster.
+      target.clear_service_registry_entries
+
       target_name = target.name
       section("Start bootstrapping nodes in cluster #{target_name}")
       start_monitor_bootstrap(target)

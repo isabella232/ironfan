@@ -66,6 +66,8 @@ module Ironfan
 
   ServerSlice.class_eval do
     ERROR_CHEF_NODES_NOT_FOUND = "Can't find all the Chef Nodes belonging to this cluster. The Chef Nodes may haven't been created or have already been deleted."
+    WAIT_TIMEOUT = 180 # 60 * 3 seconds
+    SLEEP_TIME_INTERVAL = 3 # 3 seconds
 
     include DryRunnable
     def sync_roles
@@ -80,9 +82,7 @@ module Ironfan
       # Part of Ironfan code depends on Chef Search API to retrieve all Chef Nodes of a cluster.
       # Chef Search API has some latency to return the newly created Chef Nodes, so we need to wait.
       step("Ensure all chef nodes are created and can be returned by Chef Search API")
-      timeout = 180 # 60 * 3 seconds
-      sleep_interval = 3 # 3 seconds
-
+      timeout = WAIT_TIMEOUT
       while true
         nodes = []
         Chef::Search::Query.new.search(:node, "cluster_name:#{cluster_name}") do |n|
@@ -91,11 +91,39 @@ module Ironfan
         Chef::Log.debug("#{nodes.length} Chef Nodes for cluster #{cluster_name} are returned by Chef Search API: #{nodes}")
         break if nodes.length >= self.length
 
-        timeout -= sleep_interval
+        timeout -= SLEEP_TIME_INTERVAL
         raise ERROR_CHEF_NODES_NOT_FOUND if timeout < 0
         Chef::Log.debug("Waiting for Chef Solr Server to generate search index for all #{self.length} Chef Nodes of cluster #{cluster_name}")
-        sleep(sleep_interval)
+        sleep(SLEEP_TIME_INTERVAL)
       end
+    end
+
+    # Delete attribute node[:provides_service] to clear all service registry entries in Chef nodes
+    def clear_service_registry_entries
+      return if self.empty?
+      step(" clear all service registry entries in Chef nodes of cluster #{self.name}")
+      nodes_name = []
+      self.servers.each do |svr|
+        node = svr.chef_node
+        node.delete(:provides_service)
+        node.save
+        nodes_name << "name:#{node.name}"
+      end
+
+      Chef::Log.debug("wait until Chef Search Server can't find the deleted service registry entries")
+      timeout = WAIT_TIMEOUT
+      while true
+        sleep(SLEEP_TIME_INTERVAL)
+        nodes = []
+        Chef::Search::Query.new.search(:node, "provides_service:* AND (#{nodes_name.join(' OR ')})") do |n|
+          nodes.push(n)
+        end
+        Chef::Log.debug("#{nodes.length} Chef Nodes for cluster #{self.name} are returned by Chef Search API: #{nodes}")
+        break if nodes.empty?
+        timeout -= SLEEP_TIME_INTERVAL
+        raise "service registry entries can't be cleared in Chef Search Server" if timeout < 0
+      end
+      Chef::Log.debug("all service registry entries are cleared")
     end
   end
 
