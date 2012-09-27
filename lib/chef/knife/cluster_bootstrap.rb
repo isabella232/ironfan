@@ -63,6 +63,10 @@ class Chef
         Ironfan::Script.load_deps
       end
 
+      def relevant?(server)
+        server.running?
+      end
+
       def perform_execution(target)
         bootstrap_cluster(target)
       end
