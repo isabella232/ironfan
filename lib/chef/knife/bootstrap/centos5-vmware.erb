@@ -116,13 +116,18 @@ EOP
 ) >> /etc/rc.d/rc.local
 fi
 
-while [ true ]; do
-  ps -ef | grep -v "grep" | grep "chef-client"
-  if [ $? != 0 ]; then
-    break
-  else
-    sleep 3
-  fi
-done
+cat <<'EOP'
+ps -ef | grep -v "grep" | grep "chef-client" | awk '{print $2}' | xargs kill -9
+EOP
+) > /tmp/kill-chef-client
+chmod +x /tmp/kill-chef-client
+
+ps -ef | grep -v "grep" | grep "chef-client"
+if [ $? == 0 ]; then
+   echo "chef-client is run by rc.local, kill it"
+   /tmp/kill-chef-client
+fi
+rm -rf /tmp/kill-chef-client
+
 <%= start_chef %>'
 
