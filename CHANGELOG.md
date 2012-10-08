@@ -1,4 +1,13 @@
-# 3.1.4.serengeti.0.6
+# 3.1.4.serengeti.0.7 (2012-10-8)
+
+* Setup password-less ssh login to cluster nodes
+* Bootstrap all nodes in a cluster in paralell instead of facet by facet
+* Clear service registry entries before bootstrapping cluster to ensure all nodes and its service daemons are synced up
+* Avoid naming conflict between Chef roles and Ironfan generated cluster/facet roles
+* Enable configuration for Hadoop Topology Rack Awareness and Hadoop Virtualization Extensions
+* Several bug fix
+
+# 3.1.4.serengeti.0.6 (2012-8-21)
 
 * Add support for setting cluster level and facet level cluster configuration in cluster definition json file
 * Report ERROR when bootstrapping a VM with no valid IP
@@ -7,7 +16,7 @@
 * Save package repository info (e.g. yum, apt) into cluster role
 * Several bug fix
 
-# 3.1.4.serengeti.0.5: Refactor Ironfan to work with VMware vSphere 5.0 in addition to EC2
+# 3.1.4.serengeti.0.5 (2012-6-13): Refactor Ironfan to work with VMware vSphere 5.0 in addition to EC2
 
 * Refactor Ironfan code architecture to support multi cloud providers gracefully.
 * Add full support for vSphere Cloud (i.e. create and manage VMs in VMware vCenter server).
