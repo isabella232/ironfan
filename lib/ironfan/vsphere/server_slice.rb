@@ -25,6 +25,8 @@ module Ironfan
       #
 
       def start(bootstrap = false)
+        set_chef_client_flag(bootstrap, true)
+
         start_monitor_progess(self)
         task = cloud.fog_connection.start_cluster
         while !task.finished?
@@ -33,6 +35,8 @@ module Ironfan
         end
         monitor_start_progress(self, task.get_progress, !bootstrap)
         update_fog_servers(task.get_progress.result.servers)
+
+        set_chef_client_flag(bootstrap, false)
 
         return task.get_result.succeed?
       end
@@ -97,6 +101,18 @@ module Ironfan
           return true
         end
         return false
+      end
+
+      # if serengeti server will run chef-client in the node, set the flag to tell the node not run chef-client when powered on by serengeti server,
+      # so as to avoid conflict of the two running chef-client.
+      def set_chef_client_flag(bootstrap, run_by_serengeti)
+        if bootstrap
+          nodes = cluster_nodes(self)
+          nodes.each do |node|
+            node[:run_by_serengeti] = run_by_serengeti
+            node.save
+          end
+        end
       end
 
     end

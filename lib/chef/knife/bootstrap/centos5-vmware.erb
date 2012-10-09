@@ -89,16 +89,18 @@ EOP
 (
 cat <<'EOP'
 node = Chef::Node.load("<%= @config[:node].name %>")
-# set node bootstrapped initial value
-node["provision"]["bootstrapped"] = nil
-# run chef-client
-ret = system("<%= start_chef %> > /etc/chef/bootstrap_node.log")
-# set node status
-status = ret ? "Service Ready" : "Bootstrap Failed"
-node["provision"]["status"] = status
-# set node bootstrapped
-node["provision"]["bootstrapped"] = ret
-node.save
+# Do not to run chef-client if powered on the VM by serengeti server
+if !node[:run_by_serengeti]
+  # run chef-client
+  ret = system("<%= start_chef %> > /etc/chef/bootstrap_node.log")
+  node = Chef::Node.load("<%= @config[:node].name %>")
+  # set node status
+  node[:provision] ||= {}
+  node[:provision][:status] = ret ? "Service Ready" : "Bootstrap Failed"
+  # set node bootstrapped
+  node[:provision][:bootstrapped] = ret
+  node.save
+end
 EOP
 ) > /etc/chef/bootstrap_node.rb
 
