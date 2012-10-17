@@ -56,7 +56,7 @@ module Ironfan
       def save_cluster_configuration
         conf = cluster_attributes(CLUSTER_CONF_KEY)
         conf ||= {}
-        @cluster_role.default_attributes({ CLUSTER_CONF_KEY => conf })
+        merge_to_cluster_role({ CLUSTER_CONF_KEY => conf })
       end
 
       # Save package repository info (e.g. yum, apt) into cluster role
@@ -64,7 +64,7 @@ module Ironfan
         conf = {}
         conf[:disable_external_yum_repo] = Chef::Config[:knife][:disable_external_yum_repo]
         conf[:yum_repos] = Chef::Config[:knife][:yum_repos]
-        @cluster_role.default_attributes.merge!(conf)
+        merge_to_cluster_role(conf)
       end
 
       # save rack topology used by Hadoop
@@ -99,7 +99,7 @@ module Ironfan
           }
         }
         Chef::Log.debug('saving Rack Topology to cluster role: ' + conf.to_s)
-        @cluster_role.default_attributes.merge!(conf)
+        merge_to_cluster_role(conf)
       end
 
       def cluster_attributes(key)

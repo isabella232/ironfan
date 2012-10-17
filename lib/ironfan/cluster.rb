@@ -20,6 +20,7 @@ module Ironfan
   #
   class Cluster < Ironfan::ComputeBuilder
     attr_reader :facets, :undefined_servers, :provider
+    attr_accessor :action
     has_keys :hadoop_distro
 
     def initialize(provider, name, attrs={})
@@ -28,6 +29,7 @@ module Ironfan
       @cluster           = self
       @facets            = Mash.new
       @chef_roles        = []
+      @action            = nil # the action to be taken on this cluster
       environment          :_default if environment.blank?
       create_cluster_role
     end
@@ -58,6 +60,7 @@ module Ironfan
 
     # Update the cluster role
     def sync_cluster_role
+      save_cluster_general_data
     end
 
     #
@@ -180,6 +183,17 @@ end
     # Create a new server slice
     def new_slice(parent, servers, slice_name)
       Ironfan::ServerSlice.new(parent, servers, slice_name)
+    end
+
+    def merge_to_cluster_role(conf)
+      return if conf.nil? or conf.empty?
+      @cluster_role.default_attributes.merge!(conf)
+    end
+
+    def save_cluster_general_data
+      conf = {}
+      conf[:cluster_action] = action
+      merge_to_cluster_role(conf)
     end
   end
 end

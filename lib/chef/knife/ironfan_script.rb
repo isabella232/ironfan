@@ -56,6 +56,7 @@ module Ironfan
       end
 
       # Pre-populate information in cloud and chef
+      target.cluster.action = sub_command
       target.sync_to_cloud
       target.sync_to_chef
 
