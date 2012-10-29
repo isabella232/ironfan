@@ -75,14 +75,15 @@ module Ironfan
         topology_hve_enabled = (topology_policy and topology_policy == 'HVE')
         topology = self.servers.collect do |svr|
           vm = svr.fog_server
-          next if !vm or !vm.ipaddress or !vm.rack or !vm.physical_host
+          next if !vm or !vm.ipaddress or !vm.physical_host
+          rack = vm.rack.to_s.empty? ? 'default-rack' : vm.rack
           case topology_policy
           when 'RACK_AS_RACK'
-            "#{vm.ipaddress} /#{vm.rack}"
+            "#{vm.ipaddress} /#{rack}"
           when 'HOST_AS_RACK'
             "#{vm.ipaddress} /#{vm.physical_host}"
           when 'HVE'
-            "#{vm.ipaddress} /#{vm.rack}/#{vm.physical_host}"
+            "#{vm.ipaddress} /#{rack}/#{vm.physical_host}"
           else
             nil
           end
