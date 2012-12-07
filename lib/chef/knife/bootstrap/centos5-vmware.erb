@@ -1,5 +1,5 @@
 bash -c '
-<%= "export http_proxy=\"#{knife_config[:bootstrap_proxy]}\"" if knife_config[:bootstrap_proxy] -%>
+<%= "export http_proxy=#{knife_config[:bootstrap_proxy]} no_proxy=*.vmware.com,10.*,192.168.*" if knife_config[:bootstrap_proxy] -%>
 
 <%- if knife_config[:bootstrap_proxy]
 http, proxy_host, proxy_port = knife_config[:bootstrap_proxy].split(':')
@@ -11,6 +11,9 @@ cat <<'EOP'
 EOP
 ) > ~/.rpmmacros
 <%- end %>
+
+# disable yum fastestmirror plugin since it is very slow when detecting the fastest mirror
+<%= %q{sed -i "s|enabled=1|enabled=0|" /etc/yum/pluginconf.d/fastestmirror.conf} %>
 
 if [ ! -f /usr/bin/chef-client ]; then
   gem update --system --no-rdoc --no-ri

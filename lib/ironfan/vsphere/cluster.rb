@@ -24,6 +24,7 @@ module Ironfan
     GROUPS_KEY = 'groups'
     CLUSTER_CONF_KEY = 'cluster_configuration'
     RACK_TOPOLOGY_POLICY_KEY = 'rack_topology_policy'
+    HTTP_PROXY = 'http_proxy'
 
     class Cluster < Ironfan::Cluster
 
@@ -45,7 +46,7 @@ module Ironfan
       def create_cluster_role
         super
         save_cluster_configuration
-        save_package_repo_configuration
+        save_http_proxy_configuration
       end
 
       def new_slice(*args)
@@ -59,12 +60,13 @@ module Ironfan
         merge_to_cluster_role({ CLUSTER_CONF_KEY => conf })
       end
 
-      # Save package repository info (e.g. yum, apt) into cluster role
-      def save_package_repo_configuration
+      # Save http_proxy setting
+      def save_http_proxy_configuration
         conf = {}
-        conf[:disable_external_yum_repo] = Chef::Config[:knife][:disable_external_yum_repo]
-        conf[:yum_repos] = Chef::Config[:knife][:yum_repos]
+        conf[:http_proxy] = cluster_attributes(HTTP_PROXY) || Chef::Config[:knife][:bootstrap_proxy]
+        conf[:http_proxy] = nil if conf[:http_proxy].to_s.empty?
         merge_to_cluster_role(conf)
+        Chef::Config[:knife][:bootstrap_proxy] = conf[:http_proxy] # http_proxy will be used in chef bootstrap script
       end
 
       # save rack topology used by Hadoop

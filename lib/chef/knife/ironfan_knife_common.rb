@@ -66,7 +66,16 @@ module Ironfan
       begin
         cluster_def = JSON.parse(File.read(filename))['cluster_definition']
         distro_name = cluster_def['distro']
-        distro_repo = cluster_def['distro_map']
+        # package_repos is an array of yum (or apt) server repo url which points to yum server providing the hadoop rpm packages
+        package_repos = cluster_def['distro_package_repos'] || [] # this is user specified yum server repos for this hadoop distro
+        # tell chef recipes install hadoop from tarball or rpms
+        is_install_from_tarball = package_repos.empty?
+        # add Serengeti internal yum server repo which provides hortonworks vsphere ha packages and other packages
+        package_repos.concat(Chef::Config[:knife][:yum_repos]).uniq!
+
+        distro_repo = cluster_def['distro_map'] || {} # 'distro_map' is a Hash: { 'hadoop' => tarball_url, 'hbase' => tarball_url, ... }
+        distro_repo['package_repos'] = package_repos
+        distro_repo['is_install_from_tarball'] = is_install_from_tarball
         distro_repo['id'] = distro_name
       rescue StandardError => e
         raise e, "Malformed hadoop distro info in cluster definition file."
