@@ -1,9 +1,19 @@
 bash -c '
-<%= "export http_proxy=#{knife_config[:bootstrap_proxy]} no_proxy=*.vmware.com,10.*,192.168.*" if knife_config[:bootstrap_proxy] -%>
+<%- if knife_config[:bootstrap_proxy]
+proxy_env = "export http_proxy=#{knife_config[:bootstrap_proxy]} no_proxy=#{knife_config[:bootstrap_no_proxy]}"
+%>
+# add proxy setting into /etc/profile
+grep -q '^export http_proxy' /etc/profile
+test $? -ne 0 && echo '<%= proxy_env %>' >> /etc/profile
+
+# export proxy setting for chef-client
+<%= proxy_env %>
+<%- end %>
 
 <%- if knife_config[:bootstrap_proxy]
 http, proxy_host, proxy_port = knife_config[:bootstrap_proxy].split(':')
 %>
+# add proxy setting for rpm command
 (
 cat <<'EOP'
 %_httpproxy <%= proxy_host[2..-1] %>
@@ -15,6 +25,7 @@ EOP
 # disable yum fastestmirror plugin since it is very slow when detecting the fastest mirror
 <%= %q{sed -i "s|enabled=1|enabled=0|" /etc/yum/pluginconf.d/fastestmirror.conf} %>
 
+# install chef-client
 if [ ! -f /usr/bin/chef-client ]; then
   gem update --system --no-rdoc --no-ri
   gem install ohai --no-rdoc --no-ri --verbose

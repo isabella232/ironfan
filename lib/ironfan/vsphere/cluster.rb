@@ -25,6 +25,7 @@ module Ironfan
     CLUSTER_CONF_KEY = 'cluster_configuration'
     RACK_TOPOLOGY_POLICY_KEY = 'rack_topology_policy'
     HTTP_PROXY = 'http_proxy'
+    NO_PROXY = 'no_proxy'
 
     class Cluster < Ironfan::Cluster
 
@@ -63,10 +64,13 @@ module Ironfan
       # Save http_proxy setting
       def save_http_proxy_configuration
         conf = {}
-        conf[:http_proxy] = cluster_attributes(HTTP_PROXY) || Chef::Config[:knife][:bootstrap_proxy]
-        conf[:http_proxy] = nil if conf[:http_proxy].to_s.empty?
+        conf[:http_proxy] = cluster_attributes(HTTP_PROXY)
+        conf[:http_proxy] = Chef::Config[:knife][:bootstrap_proxy] if conf[:http_proxy].to_s.empty?
+        conf[:no_proxy] = cluster_attributes(NO_PROXY)
+        conf[:no_proxy] = Chef::Config[:knife][:bootstrap_no_proxy] if conf[:no_proxy].to_s.empty?
         merge_to_cluster_role(conf)
         Chef::Config[:knife][:bootstrap_proxy] = conf[:http_proxy] # http_proxy will be used in chef bootstrap script
+        Chef::Config[:knife][:bootstrap_no_proxy] = conf[:no_proxy]
       end
 
       # save rack topology used by Hadoop
