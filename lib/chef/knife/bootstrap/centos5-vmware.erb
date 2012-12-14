@@ -3,8 +3,8 @@ bash -c '
 proxy_env = "export http_proxy=#{knife_config[:bootstrap_proxy]} no_proxy=#{knife_config[:bootstrap_no_proxy]}"
 %>
 # add proxy setting into /etc/profile
-grep -q '^export http_proxy' /etc/profile
-test $? -ne 0 && echo '<%= proxy_env %>' >> /etc/profile
+grep -q "^export http_proxy" /etc/profile
+test $? -ne 0 && echo "<%= proxy_env %>" >> /etc/profile
 
 # export proxy setting for chef-client
 <%= proxy_env %>
