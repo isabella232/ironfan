@@ -25,6 +25,18 @@ EOP
 # disable yum fastestmirror plugin since it is very slow when detecting the fastest mirror
 <%= %q{sed -i "s|enabled=1|enabled=0|" /etc/yum/pluginconf.d/fastestmirror.conf} %>
 
+# speed up yum package installation; default timeout is 30s and default retries is 10
+grep -q "^timeout=2" /etc/yum.conf
+test $? -ne 0 &&
+(
+cat <<'EOP'
+# speed up yum package installation
+timeout=2
+retries=5
+EOP
+) >> /etc/yum.conf
+
+
 # install chef-client
 if [ ! -f /usr/bin/chef-client ]; then
   gem update --system --no-rdoc --no-ri
