@@ -13,7 +13,6 @@
 #   limitations under the License.
 #
 
-require 'cloud_manager'
 
 module Ironfan
   class IaasProvider
@@ -32,29 +31,37 @@ module Ironfan
       @connection_desc = @@connection_desc
 
       @servers = Servers.new(self)
+      # set_log_level
+    end
 
+    def set_log_level
       level = Chef::Log.level.to_s
       level = 'warning' if 'warn' == level
       Serengeti::CloudManager::Manager.set_log_level(level)
     end
 
     def create_cluster
+      require 'cloud_manager'
       Serengeti::CloudManager::Manager.create_cluster(@connection_desc, :wait => false)
     end
 
     def delete_cluster
+      require 'cloud_manager'
       Serengeti::CloudManager::Manager.delete_cluster(@connection_desc, :wait => false)
     end
 
     def stop_cluster
+      require 'cloud_manager'
       Serengeti::CloudManager::Manager.stop_cluster(@connection_desc, :wait => false)
     end
 
     def start_cluster
+      require 'cloud_manager'
       Serengeti::CloudManager::Manager.start_cluster(@connection_desc, :wait => false)
     end
 
     def get_cluster
+      require 'cloud_manager'
       Serengeti::CloudManager::Manager.list_vms_cluster(@connection_desc, :wait => true)
     end
   end

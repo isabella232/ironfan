@@ -16,11 +16,11 @@
 require 'ironfan/cloud'
 
 module Ironfan
-  module Vsphere
+  module Static
     class Cloud < Ironfan::Cloud::Base
       def initialize *args
         super *args
-        name :vsphere
+        name :static
       end
 
       def fog_connection

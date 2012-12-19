@@ -14,7 +14,7 @@
 #
 
 module Ironfan
-  module Vsphere
+  module Static
 
     class Facet < Ironfan::Facet
 
@@ -23,7 +23,7 @@ module Ironfan
       end
 
       def new_server(*args)
-        Ironfan::Vsphere::Server.new(*args)
+        Ironfan::Static::Server.new(*args)
       end
 
       protected
@@ -34,7 +34,7 @@ module Ironfan
       end
 
       def new_slice(*args)
-        Ironfan::Vsphere::ServerSlice.new(*args)
+        Ironfan::Static::ServerSlice.new(*args)
       end
 
       # Save cluster configuration into facet role

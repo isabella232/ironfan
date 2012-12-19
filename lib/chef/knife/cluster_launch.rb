@@ -63,7 +63,7 @@ class Chef
       def perform_execution(target)
         # Launch servers
         section("Creating machines in Cloud", :green)
-        ret = target.create_servers
+        ret = target.create_servers config[:from_file]
         die('Creating cluster VMs failed. Abort!', CREATE_FAILURE) if !ret
 
         # Sync vm ip, vm attached disks, vm rack and other info to Chef

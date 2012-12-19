@@ -19,7 +19,8 @@ module Ironfan
     def discover!
       discover_ironfan!
       discover_chef_nodes!
-      discover_fog_servers!  unless Ironfan.chef_config[:cloud] == false
+      # XXX asdf
+      # discover_fog_servers!  unless Ironfan.chef_config[:cloud] == false
       discover_chef_clients!
     end
 

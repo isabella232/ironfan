@@ -31,7 +31,6 @@ module Ironfan
       require 'formatador'
       require 'chef/node'
       require 'chef/api_client'
-      require 'fog'
     end
 
     def load_ironfan
@@ -50,7 +49,7 @@ module Ironfan
     end
 
     def initialize_ironfan_broker(config_file)
-      require 'ironfan/iaas_layer'
+      require 'ironfan/iaas_layer' 
 
       initialize_iaas_provider(config_file)
       save_distro_info(config_file)

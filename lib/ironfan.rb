@@ -42,6 +42,7 @@ require 'ironfan/deprecated'        # stuff slated to go away
 # include cloud providers
 require 'ironfan/vsphere/cluster'
 require 'ironfan/ec2/cluster'
+require 'ironfan/static/cluster'
 
 module Ironfan
 
@@ -246,6 +247,8 @@ module Ironfan
         Ironfan::Ec2::Cluster.new(name, attrs)
       when :vsphere
         Ironfan::Vsphere::Cluster.new(name, attrs)
+      when :static
+        Ironfan::Static::Cluster.new(name, attrs)
       else
         raise "Unknown cloud provider #{provider.inspect}. Only supports :ec2 and :vsphere so far."
       end
