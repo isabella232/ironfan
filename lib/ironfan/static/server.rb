@@ -25,12 +25,19 @@ module Ironfan
       # Override VM attributes methods defined in base class
       #
 
-      def running?
-        has_cloud_state?('poweredOn')
+      # always trust upper layer input
+      def in_cloud?
+         true
       end
 
+      # always trust upper layer input
+      def running?
+        true
+      end
+
+      # always trust upper layer input
       def startable?
-        has_cloud_state?('poweredOff')
+        true
       end
 
       def sync_volume_attributes

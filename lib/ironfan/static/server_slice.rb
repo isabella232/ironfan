@@ -70,11 +70,13 @@ module Ironfan
       # Override VM actions methods defined in base class
       #
 
-      def start(bootstrap = false)
+      def start(cluster_def_file, bootstrap = false)
+        update_fog_servers(load_servers_from_file(cluster_def_file))
         true
       end
 
-      def stop
+      def stop(cluster_def_file)
+        update_fog_servers(load_servers_from_file(cluster_def_file))
         true
       end
 

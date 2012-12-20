@@ -30,7 +30,7 @@ class Chef
 
       def perform_execution(target)
         section("Stopping cluster #{target_name}")
-        ret = super(target)
+        ret = target.stop config[:from_file]
         die('Stopping cluster failed. Abort!', STOP_FAILURE) if !ret
 
         section("Stopping cluster #{target_name} completed.")
