@@ -42,7 +42,9 @@ require 'ironfan/deprecated'        # stuff slated to go away
 # include cloud providers
 require 'ironfan/vsphere/cluster'
 require 'ironfan/ec2/cluster'
-require 'ironfan/static/cluster'
+
+#require 'ironfan/vsphere/cloud_manager'
+require 'ironfan/static/cloud_manager'
 
 module Ironfan
 
@@ -248,11 +250,27 @@ module Ironfan
       when :vsphere
         Ironfan::Vsphere::Cluster.new(name, attrs)
       when :static
-        Ironfan::Static::Cluster.new(name, attrs)
+        Ironfan::Vsphere::Cluster.new(name, attrs)
       else
         raise "Unknown cloud provider #{provider.inspect}. Only supports :ec2 and :vsphere so far."
       end
 
     cluster
+  end
+  def self.new_cloud_manager(provider)
+    provider = provider.to_sym
+
+    cloud_manager =
+      case provider
+      when :ec2
+        nil # TODO
+      when :vsphere
+        Ironfan::Vsphere::CloudManager.new
+      when :static
+        Ironfan::Static::CloudManager.new
+      else
+        raise "Unknown cloud provider #{provider.inspect}. Only supports :ec2 and :vsphere so far."
+      end
+    cloud_manager
   end
 end
