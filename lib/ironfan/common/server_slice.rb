@@ -16,7 +16,7 @@
 require 'ironfan/monitor'
 
 module Ironfan
-  module Vsphere
+  module Common
     class ServerSlice < Ironfan::ServerSlice
       include Ironfan::Monitor
 

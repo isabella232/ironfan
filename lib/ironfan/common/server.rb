@@ -14,7 +14,7 @@
 #
 
 module Ironfan
-  module Vsphere
+  module Common
     class Server < Ironfan::Server
 
       def initialize(*args)

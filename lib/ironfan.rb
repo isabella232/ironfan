@@ -40,7 +40,7 @@ require 'ironfan/chef_layer'        # interface to chef for server actions
 require 'ironfan/deprecated'        # stuff slated to go away
 #
 # include cloud providers
-require 'ironfan/vsphere/cluster'
+require 'ironfan/common/cluster'
 require 'ironfan/ec2/cluster'
 
 #require 'ironfan/vsphere/cloud_manager'
@@ -248,9 +248,9 @@ module Ironfan
       when :ec2
         Ironfan::Ec2::Cluster.new(name, attrs)
       when :vsphere
-        Ironfan::Vsphere::Cluster.new(name, attrs)
+        Ironfan::Common::Cluster.new(:vsphere, name, attrs)
       when :static
-        Ironfan::Vsphere::Cluster.new(name, attrs)
+        Ironfan::Common::Cluster.new(:static, name, attrs)
       else
         raise "Unknown cloud provider #{provider.inspect}. Only supports :ec2 and :vsphere so far."
       end

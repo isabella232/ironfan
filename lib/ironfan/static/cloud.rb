@@ -16,10 +16,10 @@
 require 'ironfan/common/cloud'
 
 module Ironfan
-  module Vsphere
+  module Static
     class Cloud < Ironfan::Common::Cloud
       def initialize *args
-        super :vsphere, *args
+        super :static, *args
       end
     end
   end

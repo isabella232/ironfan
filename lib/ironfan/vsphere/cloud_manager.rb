@@ -16,7 +16,7 @@
 require 'cloud_manager'
 
 module Ironfan
-  module Static
+  module Vsphere
     class CloudManager
        def set_log_level level
          Serengeti::CloudManager::Manager.set_log_level(level)

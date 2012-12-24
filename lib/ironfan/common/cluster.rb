@@ -14,12 +14,12 @@
 #
 
 require 'ironfan'
-require 'ironfan/vsphere/facet'
-require 'ironfan/vsphere/server'
-require 'ironfan/vsphere/server_slice'
+require 'ironfan/common/facet'
+require 'ironfan/common/server'
+require 'ironfan/common/server_slice'
 
 module Ironfan
-  module Vsphere
+  module Common
     CLUSTER_DEF_KEY = 'cluster_definition'
     GROUPS_KEY = 'groups'
     CLUSTER_CONF_KEY = 'cluster_configuration'
@@ -29,12 +29,12 @@ module Ironfan
 
     class Cluster < Ironfan::Cluster
 
-      def initialize(*args)
-        super(:vsphere, *args)
+      def initialize(provider, *args)
+        super(provider, *args)
       end
 
       def new_facet(*args)
-        Ironfan::Vsphere::Facet.new(*args)
+        Ironfan::Common::Facet.new(*args)
       end
 
       def sync_cluster_role
@@ -51,7 +51,7 @@ module Ironfan
       end
 
       def new_slice(*args)
-        Ironfan::Vsphere::ServerSlice.new(*args)
+        Ironfan::Common::ServerSlice.new(*args)
       end
 
       # Save cluster configuration into cluster role
