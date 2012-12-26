@@ -42,7 +42,7 @@ class Chef
 
       def perform_execution(target)
         section("Starting cluster #{target_name}")
-        ret = target.start(config[:from_file], config[:bootstrap])
+        ret = target.start(config[:bootstrap])
         die('Starting cluster failed. Abort!', START_FAILURE) if !ret
 
         # Sync vm ip, vm attached disks, vm rack and other info to Chef
