@@ -53,7 +53,7 @@ module Ironfan
             @ipaddress          = hash["ip_address"]
             @private_ip_address = hash["ip_address"]
             @public_ip_address  = hash["ip_address"]
-            @volumes            = hash["volumes"] || []
+            @volumes            = hash["volumes"] || ['/dev/sdc']
             @state              = hash["state"]
             @status             = hash["status"]
             @action             = hash["action"]
