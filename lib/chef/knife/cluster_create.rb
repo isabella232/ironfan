@@ -44,9 +44,6 @@ class Chef
       def run
         load_ironfan
 
-        section("Creating cluster file", :green)
-        Ironfan.create_cluster(config[:from_file], config[:yes])
-
         # Call ClusterLaunch.run
         super
       end
