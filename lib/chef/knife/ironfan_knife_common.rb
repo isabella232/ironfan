@@ -54,7 +54,7 @@ module Ironfan
 
       initialize_iaas_provider(config_file)
       save_distro_info(config_file)
-      save_cluster_file(config_file, config[:yes])
+      save_cluster_file(config_file, true)
       save_message_queue_server_info(config_file)
     end
 
