@@ -32,9 +32,7 @@ module Ironfan
 
       @servers = Servers.new(self)
 
-      # XXX fix this issue, vsphere/cloud need to be extracted as common
-      #@cloud_manager = Ironfan.new_cloud_manager(provider)
-      @cloud_manager = Ironfan.new_cloud_manager :static
+      @cloud_manager = Ironfan.new_cloud_manager(provider)
 
       set_log_level
     end
