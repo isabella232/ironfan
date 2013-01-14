@@ -26,7 +26,7 @@ module Ironfan
       #
 
       def running?
-        has_cloud_state?('poweredOn')
+        has_cloud_state?('poweredOn') || has_cloud_state?('VM Ready')
       end
 
       def startable?
