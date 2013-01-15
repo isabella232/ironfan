@@ -225,6 +225,10 @@ module Ironfan
       mq_server = Chef::Config[:knife][:rabbitmq_host]
       mq_exchange_id = Chef::Config[:knife][:rabbitmq_exchange]
       mq_channel_id = Chef::Config[:knife][:rabbitmq_channel]
+      unless mq_server and mq_exchange_id and mq_channel_id
+        Chef::Log.debug("Missing MessageQueque configuration. Will not send data to MessageQueue.")
+        return
+      end
 
       b = Bunny.new(:host => mq_server, :logging => false)
       # start a communication session with the RabbitMQ server
