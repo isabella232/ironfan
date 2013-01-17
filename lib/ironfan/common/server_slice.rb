@@ -85,6 +85,18 @@ module Ironfan
         return task.get_result.succeed?
       end
 
+      # if serengeti server will run chef-client in the node, set the flag to tell the node not run chef-client when powered on by serengeti server,
+      # so as to avoid conflict of the two running chef-client.
+      def set_chef_client_flag(bootstrap, run_by_serengeti)
+        if bootstrap
+          nodes = cluster_nodes(self)
+          nodes.each do |node|
+            node[:run_by_serengeti] = run_by_serengeti
+            node.save
+          end
+        end
+      end
+
       protected
 
       # Update fog_servers of this ServerSlice with fog_servers returned by CloudManager
@@ -101,18 +113,6 @@ module Ironfan
           return true
         end
         return false
-      end
-
-      # if serengeti server will run chef-client in the node, set the flag to tell the node not run chef-client when powered on by serengeti server,
-      # so as to avoid conflict of the two running chef-client.
-      def set_chef_client_flag(bootstrap, run_by_serengeti)
-        if bootstrap
-          nodes = cluster_nodes(self)
-          nodes.each do |node|
-            node[:run_by_serengeti] = run_by_serengeti
-            node.save
-          end
-        end
       end
 
     end

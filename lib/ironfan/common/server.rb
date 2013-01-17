@@ -30,7 +30,7 @@ module Ironfan
       end
 
       def startable?
-        has_cloud_state?('poweredOff')
+        has_cloud_state?('poweredOff') || has_cloud_state?('Powered Off')
       end
 
       def sync_volume_attributes

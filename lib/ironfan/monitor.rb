@@ -37,6 +37,7 @@ module Ironfan
         attrs[:finished] = false
         attrs[:succeed] = nil
         attrs[:bootstrapped] = false
+        attrs[:status] = 'VM Ready'
         attrs[:progress] = 50
         attrs[:action] = ACTION_BOOTSTRAP_VM
         set_provision_attrs(node, attrs)
