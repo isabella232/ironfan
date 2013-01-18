@@ -61,32 +61,55 @@ module Ironfan
             @deleted            = hash["deleted"]
             @ha                 = hash["ha"]
             @created_at         = hash["created_at"]
+
+            node = load_chef_node @name
+            if !node.nil? && !node[:provision].nil?
+               node[:provision][:status] = @status
+               node.save
+            end
+         end
+
+         def state
+            node = load_chef_node @name
+            if !node.nil? && !node[:provision].nil?
+               state = node[:provision][:status]
+            end
+            state || @state
          end
 
          def to_hash
-           attrs = {}
-           
-           attrs[:name]          = @name
-           attrs[:hostname]      = @hostname
-           attrs[:physical_host] = @hostname
-           attrs[:ip_address]    = @ip_address
-           attrs[:status]        = @status
-           attrs[:action]        = @action
-           attrs[:finished]      = true
-           attrs[:succeed]       = true
-           attrs[:progress]      = 100
-           attrs[:created]       = @created
-           attrs[:deleted]       = @deleted
-           attrs[:rack]          = @rack
-           attrs[:error_code]    = 0
-           attrs[:error_msg]     = 'success'
-           attrs[:ha]            = @ha
+            attrs = {}     
+            attrs[:name]          = @name
+            attrs[:hostname]      = @hostname
+            attrs[:physical_host] = @hostname
+            attrs[:ip_address]    = @ip_address
+            attrs[:status]        = @status
+            attrs[:action]        = @action
+            attrs[:finished]      = true
+            attrs[:succeed]       = true
+            attrs[:progress]      = 100
+            attrs[:created]       = @created
+            attrs[:deleted]       = @deleted
+            attrs[:rack]          = @rack
+            attrs[:error_code]    = 0
+            attrs[:error_msg]     = 'success'
+            attrs[:ha]            = @ha
 
-           attrs
+            attrs
          end
 
          def get_progress
-           100
+            100
+         end
+
+         protected
+         def load_chef_node name
+           begin
+             return Chef::Node.load(@name)
+           rescue Net::HTTPServerException => e
+             raise unless Array('404').include?(e.response.code)
+             return nil
+           end
          end
       end
 
