@@ -164,7 +164,7 @@ module Ironfan
       when 'distro'
         cluster.hadoop_distro cluster_def[key]
         cluster.cluster_role do
-          override_attributes({ :hadoop => { :distro_name => cluster.hadoop_distro } })
+          override_attributes({ :hadoop => { :distro_name => cluster.hadoop_distro,  :distro_vendor => cluster_def['distro_vendor'], :distro_version => cluster_def['distro_version'] } })
         end
       when 'template_id'
         # cluster.cloud.image_name value
