@@ -68,6 +68,20 @@ module Ironfan
         return task.get_result.succeed?
       end
 
+      def config
+        return true if target_empty?
+        start_monitor_progess(self)
+        task = cloud.fog_connection.config_cluster
+        while !task.finished?
+          sleep(monitor_interval)
+          monitor_config_progress(self, task.get_progress)
+        end
+        monitor_config_progress(self, task.get_progress)
+        update_fog_servers(task.get_progress.result.servers)
+
+        return task.get_result.succeed?
+      end
+
       def create_servers(threaded = true)
         start_monitor_progess(self)
         task = cloud.fog_connection.create_cluster

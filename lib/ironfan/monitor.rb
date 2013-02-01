@@ -144,6 +144,15 @@ module Ironfan
       end
     end
 
+    def monitor_config_progress(target, progress)
+      Chef::Log.debug("Begin reporting progress of configuring cluster #{target.name}: #{progress.inspect}")
+      if progress.finished?
+        report_refined_progress(target, progress)
+      else
+        monitor_iaas_action_progress(target, progress, true)
+      end
+    end
+
     # report progress of stopping cluster to MessageQueue
     def monitor_stop_progress(target, progress)
       Chef::Log.debug("Begin reporting progress of stopping cluster #{target.name}: #{progress.inspect}")
