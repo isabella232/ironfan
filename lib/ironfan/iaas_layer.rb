@@ -59,6 +59,10 @@ module Ironfan
       @cloud_manager.start_cluster(@connection_desc, :wait => false)
     end
 
+    def config_cluster
+      Serengeti::CloudManager::Manager.reconfig_cluster(@connection_desc, :wait => false)
+    end
+
     def get_cluster
       @cloud_manager.list_vms_cluster(@connection_desc, :wait => true)
     end

@@ -145,6 +145,15 @@ module Ironfan
       end
     end
 
+    def monitor_config_progress(target, progress)
+      Chef::Log.debug("Begin reporting progress of configuring cluster #{target.name}: #{progress.inspect}")
+      if progress.finished?
+        report_refined_progress(target, progress)
+      else
+        monitor_iaas_action_progress(target, progress, true)
+      end
+    end
+
     # report progress of stopping cluster to MessageQueue
     def monitor_stop_progress(target, progress)
       Chef::Log.debug("Begin reporting progress of stopping cluster #{target.name}: #{progress.inspect}")
@@ -226,6 +235,10 @@ module Ironfan
       mq_server = Chef::Config[:knife][:rabbitmq_host]
       mq_exchange_id = Chef::Config[:knife][:rabbitmq_exchange]
       mq_channel_id = Chef::Config[:knife][:rabbitmq_channel]
+      unless mq_server and mq_exchange_id and mq_channel_id
+        Chef::Log.debug("Missing MessageQueque configuration. Will not send data to MessageQueue.")
+        return
+      end
 
       b = Bunny.new(:host => mq_server, :logging => false)
       # start a communication session with the RabbitMQ server

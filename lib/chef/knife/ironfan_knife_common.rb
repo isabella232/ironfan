@@ -53,7 +53,13 @@ module Ironfan
 
       initialize_iaas_provider(config_file)
       save_distro_info(config_file)
+      save_cluster_file(config_file, true)
       save_message_queue_server_info(config_file)
+    end
+
+    def save_cluster_file config_file, overwrite
+      Chef::Log.debug("Creating cluster file")
+      Ironfan.create_cluster(config_file, overwrite)
     end
 
     def initialize_iaas_provider(filename)
