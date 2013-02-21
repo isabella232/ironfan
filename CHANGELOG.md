@@ -1,3 +1,10 @@
+# 3.1.4.serengeti.0.8 (2013-2-21)
+
+* Add support for installing software packages using yum server
+* Generate random password for user root and serengeti on each VM
+* Add support for run 'knife cluster ssh cluster_name --no-cloud shell_commands'
+* Several bug fix
+
 # 3.1.4.serengeti.0.7 (2012-10-8)
 
 * Setup password-less ssh login to cluster nodes

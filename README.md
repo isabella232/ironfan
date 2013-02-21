@@ -28,7 +28,7 @@ You can use the following Ironfan Knife commands to manage a vSphere cluster:
 * knife cluster show   CLUSTER[-FACET[-INDEX]] --yes
 * knife cluster stop   CLUSTER[-FACET[-INDEX]] --yes
 * knife cluster start  CLUSTER[-FACET[-INDEX]] --yes --bootstrap
-* knife cluster ssh    CLUSTER[-FACET[-INDEX]] --yes "shell_commands"
+* knife cluster ssh    CLUSTER[-FACET[-INDEX]] --yes [--no-cloud] "sudo shell_commands"
 * knife cluster kill   CLUSTER[-FACET[-INDEX]] --yes
 * knife cluster bootstrap CLUSTER[-FACET[-INDEX]] --yes
 
