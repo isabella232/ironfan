@@ -347,12 +347,19 @@ module Ironfan
 
     def bootstrap_server(server)
       if server.fog_server.ipaddress.to_s.empty?
-        ui.error "#{server.name} doesn't have an IP, will not bootstrap it."
+        ui.error "node #{server.name} doesn't have an IP, will not bootstrap it."
         return BOOTSTRAP_FAILURE
       end
       # Test SSH connection
       unless config[:dry_run]
-        nil until tcp_test_ssh(server.fog_server.ipaddress) { sleep 3 }
+        20.downto(0) do |i|
+          break if tcp_test_ssh(server.fog_server.ipaddress) 
+          if i == 0
+            ui.error "node #{server.name} has IP #{server.fog_server.ipaddress}, but not able to ssh to this IP, so will not bootstrap it."
+            return BOOTSTRAP_FAILURE
+          end
+          sleep 3
+        end
       end
       # Run Bootstrap
       run_bootstrap(server, server.fog_server.ipaddress)
@@ -363,7 +370,6 @@ module Ironfan
       readable = IO.select([tcp_socket], nil, nil, 5)
       if readable
         Chef::Log.debug("sshd accepting connections on #{hostname}, banner is #{tcp_socket.gets}")
-        yield
         true
       else
         false
@@ -371,7 +377,6 @@ module Ironfan
     rescue Errno::ETIMEDOUT
       false
     rescue Errno::ECONNREFUSED
-      sleep 2
       false
     ensure
       tcp_socket && tcp_socket.close
