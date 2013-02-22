@@ -95,6 +95,10 @@ module Ironfan
     cl
   end
 
+  def self.clear_clusters()
+    Chef::Config[:clusters] = nil
+    @cluster_filenames = nil
+  end
   #
   # Return cluster if it's defined. Otherwise, search Ironfan.cluster_path
   # for an eponymous file, load it, and return the cluster it defines.
@@ -111,7 +115,9 @@ module Ironfan
 
     Chef::Log.info("Loading cluster #{cluster_file}")
 
-    require cluster_file
+    #require cluster_file
+    cluster_definition = IO.read(cluster_file)
+    eval cluster_definition
     unless clusters[cluster_name] then  die("#{cluster_file} was supposed to have the definition for the #{cluster_name} cluster, but didn't") end
 
     clusters[cluster_name]
