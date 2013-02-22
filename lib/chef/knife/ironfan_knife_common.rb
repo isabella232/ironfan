@@ -323,13 +323,6 @@ module Ironfan
     end
 
     def bootstrap_servers(target)
-      monitor_thread = Thread.new(target) do |target|
-        while true
-          sleep(monitor_interval)
-          report_progress(target)
-        end
-      end
-
       # As each server finishes, configure it
       exit_status = []
       watcher_threads = target.parallelize do |svr|
@@ -340,8 +333,6 @@ module Ironfan
       exit_status += watcher_threads.map{ |t| t.join.value }
       ## progressbar_for_threads(watcher_threads) # this bar messes up with normal logs
 
-      monitor_thread.exit
-      report_progress(target)
       exit_status
     end
 
@@ -407,7 +398,6 @@ module Ironfan
     end
 
     def exit_knife(target, exit_status)
-      report_refined_result(target, exit_status == 0)
       exit exit_status
     end
 

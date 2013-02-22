@@ -123,7 +123,6 @@ module Ironfan
 
       def target_empty?
         if self.empty? then
-          report_refined_result(self, true)
           return true
         end
         return false
