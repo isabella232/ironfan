@@ -54,7 +54,6 @@ module Ironfan
       initialize_iaas_provider(config_file)
       save_distro_info(config_file)
       save_cluster_file(config_file, true)
-      save_message_queue_server_info(config_file)
     end
 
     def save_cluster_file config_file, overwrite
@@ -99,21 +98,6 @@ module Ironfan
       databag_item.data_bag(data_bag_name)
       databag_item.raw_data = distro_repo
       databag_item.save
-    end
-
-    def save_message_queue_server_info(filename)
-      Chef::Log.debug("Loading hadoop message queue server info")
-      begin
-        message_queue_server_info = JSON.parse(File.read(filename))['system_properties']
-        Chef::Config[:knife][:rabbitmq_host] = message_queue_server_info['rabbitmq_host']
-        Chef::Config[:knife][:rabbitmq_port] = message_queue_server_info['rabbitmq_port']
-        Chef::Config[:knife][:rabbitmq_username] = message_queue_server_info['rabbitmq_username']
-        Chef::Config[:knife][:rabbitmq_password] = message_queue_server_info['rabbitmq_password']
-        Chef::Config[:knife][:rabbitmq_exchange] = message_queue_server_info['rabbitmq_exchange']
-        Chef::Config[:knife][:rabbitmq_channel] = message_queue_server_info['rabbitmq_channel']
-      rescue StandardError => e
-        raise e, "Malformed hadoop message queue server info in cluster definition file."
-      end
     end
 
     def target_name
