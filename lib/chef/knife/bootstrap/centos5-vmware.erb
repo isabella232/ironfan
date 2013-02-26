@@ -236,7 +236,7 @@ node = Chef::Node.load("<%= @config[:node].name %>")
 # Do not to run chef-client if powered on the VM by serengeti server
 if !node[:run_by_serengeti]
   # run chef-client
-  ret = system("<%= start_chef %> > /etc/chef/bootstrap_node.log")
+  ret = system("source /etc/profile; <%= start_chef %> > /etc/chef/bootstrap_node.log")
   node = Chef::Node.load("<%= @config[:node].name %>")
   # set node status
   node[:provision] ||= {}
