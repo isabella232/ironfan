@@ -45,9 +45,12 @@ require 'ironfan/ec2/cluster'
 
 #require 'ironfan/vsphere/cloud_manager'
 require 'ironfan/static/cloud_manager'
+require 'thread'
 
 module Ironfan
 
+  @mutex = Mutex.new
+  
   # path to search for cluster definition files
   def self.cluster_path
     return Chef::Config[:cluster_path] if Chef::Config[:cluster_path]
@@ -96,8 +99,10 @@ module Ironfan
   end
 
   def self.clear_clusters()
-    Chef::Config[:clusters] = nil
-    @cluster_filenames = nil
+    @mutex.synchronize do
+      Chef::Config[:clusters] = nil
+      @cluster_filenames = nil
+    end
   end
   #
   # Return cluster if it's defined. Otherwise, search Ironfan.cluster_path
@@ -109,18 +114,20 @@ module Ironfan
   # @return [Ironfan::Cluster] the requested cluster
   def self.load_cluster(cluster_name)
     raise ArgumentError, "Please supply a cluster name" if cluster_name.to_s.empty?
-    return clusters[cluster_name] if clusters[cluster_name]
+    @mutex.synchronize do
+      return clusters[cluster_name] if clusters[cluster_name]
 
-    cluster_file = cluster_filenames[cluster_name] or die("Couldn't find a definition for #{cluster_name} in cluster_path: #{cluster_path.inspect}")
+      cluster_file = cluster_filenames[cluster_name] or die("Couldn't find a definition for #{cluster_name} in cluster_path: #{cluster_path.inspect}")
 
-    Chef::Log.info("Loading cluster #{cluster_file}")
+      Chef::Log.info("Loading cluster #{cluster_file}")
 
-    #require cluster_file
-    cluster_definition = IO.read(cluster_file)
-    eval cluster_definition
-    unless clusters[cluster_name] then  die("#{cluster_file} was supposed to have the definition for the #{cluster_name} cluster, but didn't") end
+      #require cluster_file
+      cluster_definition = IO.read(cluster_file)
+      eval cluster_definition
+      unless clusters[cluster_name] then  die("#{cluster_file} was supposed to have the definition for the #{cluster_name} cluster, but didn't") end
 
-    clusters[cluster_name]
+      clusters[cluster_name]
+    end
   end
 
   #
@@ -136,7 +143,7 @@ module Ironfan
         @cluster_filenames[cluster_name] ||= filename
       end
     end
-    @cluster_filenames
+    end
   end
 
   #
