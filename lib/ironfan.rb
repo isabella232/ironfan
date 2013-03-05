@@ -143,7 +143,6 @@ module Ironfan
         @cluster_filenames[cluster_name] ||= filename
       end
     end
-    end
   end
 
   #
