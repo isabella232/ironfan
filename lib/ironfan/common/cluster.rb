@@ -48,6 +48,7 @@ module Ironfan
         super
         save_cluster_configuration
         save_http_proxy_configuration
+        save_general_configuration
       end
 
       def new_slice(*args)
@@ -59,6 +60,17 @@ module Ironfan
         conf = cluster_attributes(CLUSTER_CONF_KEY)
         conf ||= {}
         merge_to_cluster_role({ CLUSTER_CONF_KEY => conf })
+      end
+
+      def save_general_configuration
+        # The standard OS yum repos means the default yum repos for CentOS/RHEL.
+        # Serengeti has installed the required RPMs from default yum repos into Serengeti internal yum server,
+        # so the default yum repos will be disabled by default. This can speed up yum installation significantly.
+        # If any RPM from standard yum repos is not in Serengeti internal yum server, you can add the RPM into Serengeti internal yum server,
+        # or add "knife[:enable_standard_os_yum_repos] = true" into /opt/serengeti/.chef/knife.rb
+        conf = {}
+        conf[:enable_standard_os_yum_repos] = Chef::Config[:knife][:enable_standard_os_yum_repos] || false
+        merge_to_cluster_role(conf)
       end
 
       # Save http_proxy setting
