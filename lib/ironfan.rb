@@ -40,11 +40,17 @@ require 'ironfan/chef_layer'        # interface to chef for server actions
 require 'ironfan/deprecated'        # stuff slated to go away
 #
 # include cloud providers
-require 'ironfan/vsphere/cluster'
+require 'ironfan/common/cluster'
 require 'ironfan/ec2/cluster'
+
+#require 'ironfan/vsphere/cloud_manager'
+require 'ironfan/static/cloud_manager'
+require 'thread'
 
 module Ironfan
 
+  @mutex = Mutex.new
+  
   # path to search for cluster definition files
   def self.cluster_path
     return Chef::Config[:cluster_path] if Chef::Config[:cluster_path]
@@ -92,6 +98,12 @@ module Ironfan
     cl
   end
 
+  def self.clear_clusters()
+    @mutex.synchronize do
+      Chef::Config[:clusters] = nil
+      @cluster_filenames = nil
+    end
+  end
   #
   # Return cluster if it's defined. Otherwise, search Ironfan.cluster_path
   # for an eponymous file, load it, and return the cluster it defines.
@@ -102,16 +114,20 @@ module Ironfan
   # @return [Ironfan::Cluster] the requested cluster
   def self.load_cluster(cluster_name)
     raise ArgumentError, "Please supply a cluster name" if cluster_name.to_s.empty?
-    return clusters[cluster_name] if clusters[cluster_name]
+    @mutex.synchronize do
+      return clusters[cluster_name] if clusters[cluster_name]
 
-    cluster_file = cluster_filenames[cluster_name] or die("Couldn't find a definition for #{cluster_name} in cluster_path: #{cluster_path.inspect}")
+      cluster_file = cluster_filenames[cluster_name] or die("Couldn't find a definition for #{cluster_name} in cluster_path: #{cluster_path.inspect}")
 
-    Chef::Log.info("Loading cluster #{cluster_file}")
+      Chef::Log.info("Loading cluster #{cluster_file}")
 
-    require cluster_file
-    unless clusters[cluster_name] then  die("#{cluster_file} was supposed to have the definition for the #{cluster_name} cluster, but didn't") end
+      #require cluster_file
+      cluster_definition = IO.read(cluster_file)
+      eval cluster_definition
+      unless clusters[cluster_name] then  die("#{cluster_file} was supposed to have the definition for the #{cluster_name} cluster, but didn't") end
 
-    clusters[cluster_name]
+      clusters[cluster_name]
+    end
   end
 
   #
@@ -147,6 +163,7 @@ module Ironfan
     die("'name' of cluster is not specified in #{cluster_def_file}") if !cluster_name
 
     # check whether target cluster file exists
+    Chef::Log.info("cluster filename: #{cluster_filenames.inspect}")
     cluster_filename = cluster_filenames[cluster_name]
     if cluster_filename and !overwrite
       die("Cluster #{cluster_name} already exists in #{cluster_filename}. Aborted.")
@@ -245,11 +262,29 @@ module Ironfan
       when :ec2
         Ironfan::Ec2::Cluster.new(name, attrs)
       when :vsphere
-        Ironfan::Vsphere::Cluster.new(name, attrs)
+        Ironfan::Common::Cluster.new(:vsphere, name, attrs)
+      when :static
+        Ironfan::Common::Cluster.new(:static, name, attrs)
       else
         raise "Unknown cloud provider #{provider.inspect}. Only supports :ec2 and :vsphere so far."
       end
 
     cluster
+  end
+  def self.new_cloud_manager(provider)
+    provider = provider.to_sym
+
+    cloud_manager =
+      case provider
+      when :ec2
+        nil # TODO
+      when :vsphere
+        Ironfan::Vsphere::CloudManager.new
+      when :static
+        Ironfan::Static::CloudManager.new
+      else
+        raise "Unknown cloud provider #{provider.inspect}. Only supports :ec2 and :vsphere so far."
+      end
+    cloud_manager
   end
 end

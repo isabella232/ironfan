@@ -31,10 +31,10 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<chef>, ["~> 0.10.4"])
-      s.add_dependency(%q<fog>)
+#      s.add_dependency(%q<fog>)
       s.add_runtime_dependency(%q<formatador>, ["~> 0.2.1"])
       s.add_runtime_dependency(%q<gorillib>, ["~> 0.1.7"])
-      s.add_dependency(%q<cloud-manager>, [">= 0.5.0"])
+#      s.add_dependency(%q<cloud-manager>, [">= 0.5.0"])
 #      s.add_development_dependency(%q<bundler>, ["~> 1"])
 #      s.add_development_dependency(%q<jeweler>, ["~> 1.6"])
 #      s.add_development_dependency(%q<rspec>, ["~> 2.5"])
@@ -42,10 +42,10 @@ Gem::Specification.new do |s|
 #      s.add_development_dependency(%q<redcarpet>, ["~> 2"])
     else
       s.add_dependency(%q<chef>, ["~> 0.10.4"])
-      s.add_dependency(%q<fog>)
+#      s.add_dependency(%q<fog>)
       s.add_dependency(%q<formatador>, ["~> 0.2.1"])
       s.add_dependency(%q<gorillib>, ["~> 0.1.7"])
-      s.add_dependency(%q<cloud-manager>, [">= 0.5.0"])
+#      s.add_dependency(%q<cloud-manager>, [">= 0.5.0"])
 #      s.add_dependency(%q<bundler>, ["~> 1"])
 #      s.add_dependency(%q<jeweler>, ["~> 1.6"])
 #      s.add_dependency(%q<rspec>, ["~> 2.5"])
@@ -54,10 +54,10 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<chef>, ["~> 0.10.4"])
-    s.add_dependency(%q<fog>)
+#    s.add_dependency(%q<fog>)
     s.add_dependency(%q<formatador>, ["~> 0.2.1"])
     s.add_dependency(%q<gorillib>, ["~> 0.1.7"])
-    s.add_dependency(%q<cloud-manager>, [">= 0.5.0"])
+#    s.add_dependency(%q<cloud-manager>, [">= 0.5.0"])
 #    s.add_dependency(%q<bundler>, ["~> 1"])
 #    s.add_dependency(%q<jeweler>, ["~> 1.6"])
 #    s.add_dependency(%q<rspec>, ["~> 2.5"])

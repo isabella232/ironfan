@@ -16,6 +16,7 @@
 # include cloud providers
 require 'ironfan/ec2/cloud'
 require 'ironfan/vsphere/cloud'
+require 'ironfan/static/cloud'
 
 module Ironfan
   #
@@ -62,8 +63,10 @@ module Ironfan
           @cloud ||= Ironfan::Ec2::Cloud.new(self)
         when :vsphere
           @cloud ||= Ironfan::Vsphere::Cloud.new(self)
+        when :static
+          @cloud ||= Ironfan::Static::Cloud.new(self)
         else
-          raise "Unknown cloud provider #{cloud_provider.inspect}. Only supports :ec2 and :vsphere so far."
+          raise "Unknown cloud provider #{cloud_provider.inspect}. Only supports :ec2, :vsphere and :static so far."
       end
       @cloud.configure(hsh, &block) if block
       after_cloud_created(hsh)

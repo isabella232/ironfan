@@ -14,7 +14,7 @@
 #
 
 module Ironfan
-  module Vsphere
+  module Common
     class Server < Ironfan::Server
 
       def initialize(*args)
@@ -26,11 +26,15 @@ module Ironfan
       #
 
       def running?
-        has_cloud_state?('poweredOn')
+        has_cloud_state?('poweredOn') ||
+        has_cloud_state?('VM Ready') ||
+        has_cloud_state?('Service Ready') ||
+        has_cloud_state?('Bootstrap Failed')
       end
 
       def startable?
-        has_cloud_state?('poweredOff')
+        has_cloud_state?('poweredOff') ||
+        has_cloud_state?('Powered Off')
       end
 
       def sync_volume_attributes

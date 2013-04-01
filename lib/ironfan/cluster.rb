@@ -153,6 +153,7 @@ Ironfan.cluster <%= @cluster.provider.inspect %>, <%= @cluster.name.to_s.inspect
   })
 end
 }
+      require 'erb'
       ERB.new(@@CLUSTER_TEMPLATE).result(binding)
     end
 

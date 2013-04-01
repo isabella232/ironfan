@@ -123,11 +123,5 @@
     "cloud_adapter": "fog"
   },
   "system_properties": {
-    "rabbitmq_host": "localhost",
-    "rabbitmq_port": 5672,
-    "rabbitmq_username": "",
-    "rabbitmq_password": "",
-    "rabbitmq_exchange": "bddtask",
-    "rabbitmq_channel": "task.1"
   }
 }
