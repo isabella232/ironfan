@@ -185,6 +185,7 @@ end
       Ironfan::ServerSlice.new(parent, servers, slice_name)
     end
 
+    # this is not Hash deep merge, so be careful that the value of the duplicated key will be overwritten
     def merge_to_cluster_role(conf)
       return if conf.nil? or conf.empty?
       @cluster_role.default_attributes.merge!(conf)
@@ -192,7 +193,16 @@ end
 
     def save_cluster_general_data
       conf = {}
+      # save name of the action (e.g. create/bootstrap/start/stop) being performed 
       conf[:cluster_action] = action
+
+      # set YARN flag if deploying YARN cluster(i.e. Hadoop MRv2)
+      run_list = self.slice.run_list
+      if run_list.index('role[hadoop_resourcemanager]') or run_list.index('role[hadoop_nodemanager]')
+        Chef::Log.debug('Will deploy a Hadoop YARN cluster because YARN roles are specified.')
+        conf[:is_hadoop_yarn] = true
+      end
+
       merge_to_cluster_role(conf)
     end
   end
