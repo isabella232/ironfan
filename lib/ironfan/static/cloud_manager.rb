@@ -47,7 +47,7 @@ module Ironfan
             @id                 = hash["id"]
             @name               = hash["name"]
             @hostname           = hash["hostname"]
-            @physical_host      = hash["physical_host"]
+            @physical_host      = hash["hostname"]
             @rack               = hash["rack"]
             @ip_address         = hash["ip_address"]
             @ipaddress          = hash["ip_address"]
