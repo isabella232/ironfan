@@ -1,4 +1,7 @@
 bash -c '
+# explicitly set HOME in case it is overridden by sudo
+HOME=/home/<%= knife_config[:ssh_user] %>
+
 <%- if knife_config[:bootstrap_proxy]
 proxy_env = "export http_proxy=#{knife_config[:bootstrap_proxy]} no_proxy=#{knife_config[:bootstrap_no_proxy]}"
 %>
