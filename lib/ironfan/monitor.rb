@@ -38,7 +38,7 @@ module Ironfan
         attrs[:succeed] = nil
         attrs[:bootstrapped] = false
         attrs[:status] = 'VM Ready'
-        attrs[:progress] = 50
+        attrs[:progress] = 10
         attrs[:action] = ACTION_BOOTSTRAP_VM
         set_provision_attrs(node, attrs)
         node.save
@@ -66,8 +66,6 @@ module Ironfan
 
         # Get VM attributes
         attrs = vm.to_hash
-        # when creating VM is done, set the progress to 50%; once bootstrapping VM is done, set the progress to 100%
-        attrs[:progress] = vm.get_progress / 2 if !is_last_action
         # reset to correct status
         if !is_last_action and attrs[:finished] and attrs[:succeed]
           attrs[:finished] = false
