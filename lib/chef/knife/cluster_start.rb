@@ -40,7 +40,7 @@ class Chef
         :description => "Instead of running bootstrap, set chef client flag and return"
 
       def relevant?(server)
-        server.startable?
+        server.startable? || !config[:set_chef_client_flag].nil?
       end
 
       def perform_execution(target)

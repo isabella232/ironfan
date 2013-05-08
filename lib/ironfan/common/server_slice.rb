@@ -25,7 +25,7 @@ module Ironfan
       #
 
       def start(bootstrap = false)
-        set_chef_client_flag(bootstrap, true)
+        set_chef_client_flag(bootstrap, true) unless cloud.name == :static
 
         start_monitor_progess(self)
         task = cloud.fog_connection.start_cluster
@@ -36,7 +36,7 @@ module Ironfan
         monitor_start_progress(self, task.get_progress, !bootstrap)
         update_fog_servers(task.get_progress.result.servers)
 
-        set_chef_client_flag(bootstrap, false)
+        set_chef_client_flag(bootstrap, false) unless cloud.name == :static
 
         return task.get_result.succeed?
       end
