@@ -25,7 +25,24 @@ class Chef
         :description => 'Refresh cloud machine info; use --no-cloud to skip',
         :boolean     => true,
         :default     => true
+      option :set_chef_client_flag,
+        :long        => "--set-chef-client-flag [true|false]",
+        :description => "set chef client flag and return"
 
+      def relevant?(server)
+        true
+      end
+
+      def perform_execution(target)
+        if config[:set_chef_client_flag] == 'true'
+          target.set_chef_client_flag(true, true) if !target.empty?
+          return SUCCESS
+        end
+        if config[:set_chef_client_flag] == 'false'
+          target.set_chef_client_flag(true, false) if !target.empty?
+          return SUCCESS
+        end
+      end
     end
   end
 end

@@ -235,9 +235,38 @@ EOP
 # Generate script for bootstrap node and setting node status
 (
 cat <<'EOP'
+require "json"
 node = Chef::Node.load("<%= @config[:node].name %>")
 # Do not to run chef-client if powered on the VM by serengeti server
-if !node[:run_by_serengeti]
+machine_id = \`/usr/sbin/vmware-rpctool "machine.id.get"\`
+
+def should_continue(machine_id)
+  attrs = JSON.parse(machine_id)
+  new_uuid = attrs["bootupUUID"]
+
+  return true if new_uuid.nil?
+  uuid_file_name = "/opt/vmware/etc/serengeti_bootup_uuid"
+  if File.file?(uuid_file_name)
+    file = File.new(uuid_file_name, "r+")
+    old_uuid = file.gets
+    if (old_uuid != new_uuid)
+      file.pos=(0)
+      file.write(new_uuid)
+      return false
+    else
+      return true
+    end
+
+    file.close
+  else
+    file = File.new(uuid_file_name, "w")
+    file.write(new_uuid)
+    file.close
+    return false
+  end
+end
+
+if should_continue(machine_id) && (node[:forbid_run_when_boot].nil? || !node[:forbid_run_when_boot])
   # run chef-client
   ret = system("source /etc/profile; <%= start_chef %> > /etc/chef/bootstrap_node.log")
   node = Chef::Node.load("<%= @config[:node].name %>")
@@ -248,6 +277,7 @@ if !node[:run_by_serengeti]
   node[:provision][:bootstrapped] = ret
   node.save
 end
+
 EOP
 ) > /etc/chef/bootstrap_node.rb
 

@@ -101,11 +101,12 @@ module Ironfan
 
       # if serengeti server will run chef-client in the node, set the flag to tell the node not run chef-client when powered on by serengeti server,
       # so as to avoid conflict of the two running chef-client.
-      def set_chef_client_flag(bootstrap, run_by_serengeti)
+      def set_chef_client_flag(bootstrap, forbid_run_when_boot)
         if bootstrap
           nodes = cluster_nodes(self)
           nodes.each do |node|
-            node[:run_by_serengeti] = run_by_serengeti
+            Chef::Log.debug("change node[:forbid_run_when_boot] of node #{node} from #{node[:forbid_run_when_boot]} to #{forbid_run_when_boot}")
+            node[:forbid_run_when_boot] = forbid_run_when_boot
             node.save
           end
         end

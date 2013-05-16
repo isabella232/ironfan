@@ -35,23 +35,12 @@ class Chef
         :description => "Also bootstrap the launched node (default is NOT to bootstrap)",
         :boolean     => true,
         :default     => false
-      option :set_chef_client_flag,
-        :long        => "--set-chef-client-flag [true|false]",
-        :description => "Instead of running bootstrap, set chef client flag and return"
 
       def relevant?(server)
-        server.startable? || !config[:set_chef_client_flag].nil?
+        server.startable?
       end
 
       def perform_execution(target)
-        if config[:set_chef_client_flag] == 'true'
-          target.set_chef_client_flag(true, true) if !target.empty?
-          return SUCCESS
-        end
-        if config[:set_chef_client_flag] == 'false'
-          target.set_chef_client_flag(true, false) if !target.empty?
-          return SUCCESS
-        end
         section("Starting cluster #{target_name}")
         ret = target.start(config[:bootstrap])
         die('Starting cluster failed. Abort!', START_FAILURE) if !ret
