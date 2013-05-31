@@ -223,6 +223,7 @@ rm /tmp/encrypted_data_bag_secret
 (
 cat <<'EOP'
 <%= config_content %>
+<%= "no_proxy          \"#{knife_config[:bootstrap_no_proxy]}\"" if knife_config[:bootstrap_no_proxy] %>
 EOP
 ) > /etc/chef/client.rb
 
