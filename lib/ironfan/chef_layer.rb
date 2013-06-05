@@ -107,7 +107,7 @@ module Ironfan
         node = svr.chef_node
         node.delete(:provides_service)
         node.save
-        nodes_name << "name:#{node.name}"
+        nodes_name << node.name
       end
 
       Chef::Log.debug("wait until Chef Search Server can't find the deleted service registry entries")
@@ -115,8 +115,8 @@ module Ironfan
       while true
         sleep(SLEEP_TIME_INTERVAL)
         nodes = []
-        Chef::Search::Query.new.search(:node, "provides_service:* AND (#{nodes_name.join(' OR ')})") do |n|
-          nodes.push(n)
+        Chef::Search::Query.new.search(:node, "provides_service:* AND name:#{self.name}*") do |n|
+          nodes.push(n) if nodes_name.include?(n.name)
         end
         Chef::Log.debug("#{nodes.length} Chef Nodes for cluster #{self.name} are returned by Chef Search API: #{nodes}")
         break if nodes.empty?
