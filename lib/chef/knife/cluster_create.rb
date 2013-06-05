@@ -36,9 +36,7 @@ class Chef
       end
 
       def relevant?(server)
-        # always perform creating action on all servers in order to support re-run 'cluster create' after 'cluster create' failed,
-        # otherwise, re-run 'cluster create' will skip bootstrap action even if '--bootstrap' is specified.
-        true
+        server.running?
       end
 
       def run
