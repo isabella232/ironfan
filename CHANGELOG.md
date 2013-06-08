@@ -1,3 +1,8 @@
+# 3.1.4.serengeti.0.9 (2013-6-8)
+
+* Add support for deploying CDH4 and PivotalHD YARN cluster
+* Some bug fix and enhancement
+
 # 3.1.4.serengeti.0.8 (2013-2-21)
 
 * Add support for installing software packages using yum server
