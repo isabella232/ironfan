@@ -40,6 +40,14 @@ retries=5
 EOP
 ) >> /etc/yum.conf
 
+grep "sslverify=0" /etc/yum.conf > /dev/null
+test $? -ne 0 &&
+(
+cat <<'EOP'
+# ignore cert verification
+sslverify=0
+EOP
+) >> /etc/yum.conf
 
 # install chef-client
 if [ ! -f /usr/bin/chef-client ]; then
