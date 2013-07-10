@@ -176,7 +176,8 @@ chmod 775 <%= usr_sbin_path %>/serengeti-password
 cat <<'EOP'
 #!/bin/bash
 
-tty=\`eval echo \\\\\\$\\\${#}\` # Last argument
+tty=\`eval echo \\\\\\$\\\${#}\` # get last argument
+tty=\`basename "\$tty"\`
 
 exec </dev/\$tty >/dev/\$tty 2>&1
 
@@ -195,12 +196,30 @@ EOP
 ) > <%= usr_sbin_path %>/serengeti-tty
 chmod 775 <%= usr_sbin_path %>/serengeti-tty
 
-# We show an serengeti welcome screen instead of login prompt on tty1.
-# tty[2-6] are disabled.
-sed -i "s|^\(1:.*\):/sbin/mingetty|\1:<%= usr_sbin_path %>/serengeti-tty|" /etc/inittab
-sed -i "s|^\([2-6]:.*/sbin/mingetty\)|#\1|" /etc/inittab
+# Show a serengeti welcome screen instead of default login prompt on tty1. tty[2-6] are disabled.
 
-/sbin/init q
+## for CentOS 5
+grep -q "release 5" /etc/redhat-release
+if [ $? == 0 ]; then
+  sed -i "s|^\(1:.*\):/sbin/mingetty|\1:<%= usr_sbin_path %>/serengeti-tty|" /etc/inittab
+  sed -i "s|^\([2-6]:.*/sbin/mingetty\)|#\1|" /etc/inittab
+  /sbin/init q
+fi
+
+## for CentOS 6
+grep -q "release 6" /etc/redhat-release
+if [ $? == 0 ]; then
+  sed -i "s|ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES=/dev/tty[1-1]|g" /etc/sysconfig/init
+  sed -i "s|/sbin/mingetty|<%= usr_sbin_path %>/serengeti-tty|g" /etc/init/tty.conf
+  sed -i "s|ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES=/dev/tty[1-1]|g" /etc/init/start-ttys.conf
+  /sbin/initctl stop tty TTY=/dev/tty1
+  /sbin/initctl stop tty TTY=/dev/tty2
+  /sbin/initctl stop tty TTY=/dev/tty3
+  /sbin/initctl stop tty TTY=/dev/tty4
+  /sbin/initctl stop tty TTY=/dev/tty5
+  /sbin/initctl stop tty TTY=/dev/tty6
+  /sbin/initctl start tty TTY=/dev/tty1
+fi
 
 if [ ! -f <%= usr_sbin_path %>/.serengeti-password.log ]; then
   <%= usr_sbin_path %>/serengeti-password -a > <%= usr_sbin_path %>/.serengeti-password.log
