@@ -280,6 +280,10 @@ def should_continue(machine_id)
     if (old_uuid != new_uuid)
       file.pos=(0)
       file.write(new_uuid)
+      if File.file?("/etc/hadoop/conf/mapred.hosts.exclude")
+        \`cat /dev/null > /etc/hadoop/conf/mapred.hosts.exclude\`
+        \`cat /dev/null > /etc/hadoop/conf/dfs.hosts.exclude\`
+      end
       return false
     else
       return true
