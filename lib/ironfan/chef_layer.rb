@@ -66,8 +66,8 @@ module Ironfan
 
   ServerSlice.class_eval do
     ERROR_CHEF_NODES_NOT_FOUND = "Can't find all the Chef Nodes belonging to this cluster. The Chef Nodes may haven't been created or have already been deleted."
-    WAIT_TIMEOUT = 180 # 60 * 3 seconds
-    SLEEP_TIME_INTERVAL = 3 # 3 seconds
+    WAIT_TIMEOUT = 180 # 3 minutes
+    SLEEP_TIME_INTERVAL = 5 # 5 seconds
 
     include DryRunnable
     def sync_roles
@@ -84,6 +84,7 @@ module Ironfan
       step("Ensure all chef nodes are created and can be returned by Chef Search API")
       timeout = WAIT_TIMEOUT
       while true
+        sleep(SLEEP_TIME_INTERVAL)
         nodes = []
         Chef::Search::Query.new.search(:node, "cluster_name:#{cluster_name}") do |n|
           nodes.push(n)
@@ -94,8 +95,8 @@ module Ironfan
         timeout -= SLEEP_TIME_INTERVAL
         raise ERROR_CHEF_NODES_NOT_FOUND if timeout < 0
         Chef::Log.debug("Waiting for Chef Solr Server to generate search index for all #{self.length} Chef Nodes of cluster #{cluster_name}")
-        sleep(SLEEP_TIME_INTERVAL)
       end
+      Chef::Log.debug("all chef nodes are created")
     end
 
     # Delete attribute node[:provides_service] to clear all service registry entries in Chef nodes
