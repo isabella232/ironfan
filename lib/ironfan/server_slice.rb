@@ -49,6 +49,11 @@ module Ironfan
         self.class.new cluster, @servers.send(method, *args, &block), self.name
       end
     end
+
+    def slice(start, length)
+      self.class.new cluster, @servers.slice(start, length), self.name
+    end
+
     # true if slice contains a server with the given fullname (if arg is a
     # string) or same fullname as the given server (if a Server)
     #

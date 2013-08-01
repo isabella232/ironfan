@@ -27,6 +27,8 @@ module Ironfan
     STOP_FAILURE ||= 5
     START_FAILURE ||= 6
 
+    MAXIMUM_CONCURRENT_NODES ||= 100
+
     def self.load_deps
       require 'formatador'
       require 'chef/node'
@@ -295,7 +297,7 @@ module Ironfan
         target.cluster.facets.each do |name, facet|
           servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
           next if servers.empty?
-          section("Bootstrapping machines in facet #{name}", :green)
+          section("Bootstrapping nodes in facet #{name}", :green)
           exit_status += bootstrap_servers(servers)
         end
       else
@@ -307,15 +309,35 @@ module Ironfan
     end
 
     def bootstrap_servers(target)
-      # As each server finishes, configure it
       exit_status = []
-      watcher_threads = target.parallelize do |svr|
-        exit_value = bootstrap_server(svr)
-        monitor_bootstrap_progress(target, svr, exit_value)
-        exit_value
+
+      # Bootstrapping more than about 100 nodes simultaneously requires a powerful Chef Server and couchdb.
+      # Currently Chef Server is deployed on the same machine with Serengeti Server, and doesn't have this scalability.
+      # So we limit the number of concurrent bootstrapping nodes to maximum_concurrent_nodes.
+      max_nodes = maximum_concurrent_nodes
+      if target.length > max_nodes and max_nodes > 0
+        start = 0
+        step = max_nodes
+        while start < target.length
+          step = [step, target.length - start].min
+          ui.info "Bootstrapping nodes #{start} to #{start + step - 1} in cluster #{target.name}"
+          partial_target = target.slice(start, step)
+          watcher_threads = partial_target.parallelize do |svr|
+            exit_value = bootstrap_server(svr)
+            monitor_bootstrap_progress(partial_target, svr, exit_value)
+            exit_value
+          end
+          exit_status += watcher_threads.map{ |t| t.join.value }
+          start += step
+        end
+      else
+        watcher_threads = target.parallelize do |svr|
+          exit_value = bootstrap_server(svr)
+          monitor_bootstrap_progress(target, svr, exit_value)
+          exit_value
+        end
+        exit_status += watcher_threads.map{ |t| t.join.value }
       end
-      exit_status += watcher_threads.map{ |t| t.join.value }
-      ## progressbar_for_threads(watcher_threads) # this bar messes up with normal logs
 
       exit_status
     end
@@ -355,6 +377,10 @@ module Ironfan
       false
     ensure
       tcp_socket && tcp_socket.close
+    end
+
+    def maximum_concurrent_nodes
+      Chef::Config[:knife][:maximum_concurrent_nodes] || MAXIMUM_CONCURRENT_NODES
     end
 
     #
