@@ -1,3 +1,8 @@
+# 3.1.4.serengeti.1.0.0 (2013-8-2)
+
+* Limit the number of concurrent bootstrapping nodes to 100 (configurable via knife[:maximum_concurrent_nodes] in .chef/knife.rb) to support large scale cluster provision (200+ nodes)
+* Some bug fix and enhancement
+
 # 3.1.4.serengeti.0.9 (2013-6-8)
 
 * Add support for deploying CDH4 and PivotalHD YARN cluster
