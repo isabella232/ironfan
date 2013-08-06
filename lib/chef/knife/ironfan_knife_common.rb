@@ -26,6 +26,7 @@ module Ironfan
     DELETE_FAILURE ||= 4
     STOP_FAILURE ||= 5
     START_FAILURE ||= 6
+    IP_NOT_AVAILABLE ||= 31
 
     MAXIMUM_CONCURRENT_NODES ||= 100
 
@@ -353,7 +354,7 @@ module Ironfan
           break if tcp_test_ssh(server.fog_server.ipaddress) 
           if i == 0
             ui.error "node #{server.name} has IP #{server.fog_server.ipaddress}, but not able to ssh to this IP, so will not bootstrap it."
-            return BOOTSTRAP_FAILURE
+            return IP_NOT_AVAILABLE
           end
           sleep 3
         end
@@ -374,6 +375,10 @@ module Ironfan
     rescue Errno::ETIMEDOUT
       false
     rescue Errno::ECONNREFUSED
+      false
+    rescue Errno::ENETUNREACH
+      false
+    rescue
       false
     ensure
       tcp_socket && tcp_socket.close
