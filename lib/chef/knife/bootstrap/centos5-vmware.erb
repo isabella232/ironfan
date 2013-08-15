@@ -273,7 +273,7 @@ def should_continue(machine_id)
   new_uuid = attrs["bootupUUID"]
 
   return true if new_uuid.nil?
-  uuid_file_name = "/opt/vmware/etc/serengeti_bootup_uuid"
+  uuid_file_name = "/etc/serengeti_bootup_uuid"
   if File.file?(uuid_file_name)
     file = File.new(uuid_file_name, "r+")
     old_uuid = file.gets
