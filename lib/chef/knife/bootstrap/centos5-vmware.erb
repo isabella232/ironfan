@@ -330,13 +330,13 @@ fi
 ps -ef | grep -v "grep" | grep "chef-client"
 if [ $? == 0 ]; then
    echo "chef-client is run by rc.local, kill it"
-   ps -ef | grep -v "grep" | grep "chef-client" | awk '"'"'{print $1}'"'"' | xargs kill -9
+   ps -ef | grep -v "grep" | grep "chef-client" | awk '"'"'{print $2}'"'"' | xargs kill -9
 fi
 
 <%= start_chef %>
 ret=$?
 
 # kill mingetty or serengeti-tty to force it to respawn. vm console will be refreshed after respawn
-ps -ef | grep -v "grep" | grep "tty1" | awk '"'"'{print $1}'"'"' | xargs kill
+ps -ef | grep -v "grep" | grep "tty1" | awk '"'"'{print $2}'"'"' | xargs kill -9
 
 exit $ret'
