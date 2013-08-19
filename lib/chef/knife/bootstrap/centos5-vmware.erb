@@ -298,7 +298,13 @@ def should_continue(machine_id)
   end
 end
 
-if should_continue(machine_id) && (node[:forbid_run_when_boot].nil? || !node[:forbid_run_when_boot])
+def chef_client_is_running?
+  result = \`ps -ef | grep -v "grep" | grep "chef-client" > /dev/null; echo $?\`
+  return true if result.to_i == 0
+  return false
+end
+
+if should_continue(machine_id) && !chef_client_is_running? && (node[:forbid_run_when_boot].nil? || !node[:forbid_run_when_boot])
   # run chef-client
   ret = system("source /etc/profile; <%= start_chef %> > /etc/chef/bootstrap_node.log")
   node = Chef::Node.load("<%= @config[:node].name %>")
@@ -319,12 +325,9 @@ grep "<%= bootstrap_command %>" /etc/rc.d/rc.local > /dev/null
 if [ $? != 0 ]; then
 (
 cat <<'EOP'
-ps -ef | grep -v "grep" | grep "chef-client"
-if [ \$? != 0 ]; then
-  # Need to set HOME explicitly due to http://tickets.opscode.com/browse/CHEF-2646
-  export HOME=/root
-  <%= bootstrap_command %>
-fi
+# Need to set HOME explicitly due to http://tickets.opscode.com/browse/CHEF-2646
+export HOME=/root
+<%= bootstrap_command %>
 EOP
 ) >> /etc/rc.d/rc.local
 fi
