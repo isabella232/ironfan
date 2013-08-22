@@ -321,6 +321,8 @@ if [ $? != 0 ]; then
 cat <<'EOP'
 ps -ef | grep -v "grep" | grep "chef-client"
 if [ \$? != 0 ]; then
+  # Need to set HOME explicitly due to http://tickets.opscode.com/browse/CHEF-2646
+  export HOME=/root
   <%= bootstrap_command %>
 fi
 EOP
