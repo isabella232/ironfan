@@ -194,7 +194,7 @@ module Ironfan
     end
 
     def set_provision_attrs(chef_node, attrs)
-      chef_node[:provision] = attrs
+      chef_node.normal[:provision] = attrs
     end
 
   end

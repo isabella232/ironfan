@@ -64,7 +64,7 @@ module Ironfan
 
             node = load_chef_node @name
             if !node.nil? && !node[:provision].nil?
-               node[:provision][:status] = @status
+               node.normal[:provision][:status] = @status
                node.save
             end
          end

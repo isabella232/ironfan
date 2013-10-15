@@ -253,6 +253,8 @@ cat <<'EOP'
 <%= "no_proxy          \"#{knife_config[:bootstrap_no_proxy]}\"" if knife_config[:bootstrap_no_proxy] %>
 EOP
 ) > /etc/chef/client.rb
+# to be compatible with Chef Client 10
+sed -i -e "s|:auto|:info|" /etc/chef/client.rb
 
 (
 cat <<'EOP'

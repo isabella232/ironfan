@@ -106,7 +106,7 @@ module Ironfan
       nodes_name = []
       self.servers.each do |svr|
         node = svr.chef_node
-        node.delete(:provides_service)
+        node.normal.delete(:provides_service)
         node.save
         nodes_name << node.name
       end

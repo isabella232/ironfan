@@ -94,7 +94,7 @@ module Ironfan
       if databag.nil?
         databag = Chef::DataBag.new
         databag.name(data_bag_name)
-        databag.save
+        databag.create
       end
       databag_item = Chef::DataBagItem.load(distro_name) rescue databag_item = nil
       databag_item ||= Chef::DataBagItem.new
