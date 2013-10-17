@@ -246,6 +246,7 @@ module Ironfan
       @chef_node.name(fullname)
       set_chef_node_attributes
       set_chef_node_environment
+      sync_ipconfig_attribute
       sync_volume_attributes
       unless_dry_run do
         chef_api_server_as_client.post_rest('nodes', @chef_node)
@@ -263,10 +264,15 @@ module Ironfan
       step("  updating chef node", :blue)
       set_chef_node_attributes
       set_chef_node_environment
+      sync_ipconfig_attribute
       sync_volume_attributes
       unless_dry_run do
         chef_api_server_as_admin.put_rest("nodes/#{@chef_node.name}", @chef_node)
       end
+    end
+
+    def sync_ipconfig_attribute
+      step("   updating ipconfig attributes")
     end
 
     # Sync volume attributes. This can be overridden in subclass if needed

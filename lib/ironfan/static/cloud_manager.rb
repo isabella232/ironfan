@@ -27,6 +27,7 @@ module Ironfan
          attr_accessor :physical_host
          attr_accessor :rack
          attr_accessor :ip_address
+         attr_accessor :ip_configs
          attr_accessor :ipaddress
          attr_accessor :public_ip_address
          attr_accessor :private_ip_address
@@ -49,10 +50,11 @@ module Ironfan
             @hostname           = hash["hostname"]
             @physical_host      = hash["hostname"]
             @rack               = hash["rack"]
-            @ip_address         = hash["ip_address"]
-            @ipaddress          = hash["ip_address"]
-            @private_ip_address = hash["ip_address"]
-            @public_ip_address  = hash["ip_address"]
+            @ip_configs         = hash["ip_configs"]
+            @ip_address         = hash["ip_configs"]["MGT_NETWORK"][0]["ip_address"]
+            @ipaddress          = @ip_address
+            @private_ip_address = @ip_address
+            @public_ip_address  = @ip_address
             @volumes            = hash["volumes"] || ['/dev/sdc']
             @state              = hash["status"]
             @status             = hash["status"]

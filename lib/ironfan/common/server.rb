@@ -37,6 +37,12 @@ module Ironfan
         has_cloud_state?('Powered Off')
       end
 
+      def sync_ipconfig_attribute
+        super
+        return if fog_server.nil? or fog_server.ip_configs.nil?
+        @chef_node.normal[:ip_configs] = fog_server.ip_configs
+      end
+
       def sync_volume_attributes
         super
         return if fog_server.nil? or fog_server.volumes.nil? or fog_server.volumes.empty?
