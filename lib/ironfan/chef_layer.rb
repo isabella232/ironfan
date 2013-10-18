@@ -86,7 +86,9 @@ module Ironfan
       while true
         sleep(SLEEP_TIME_INTERVAL)
         nodes = []
-        Chef::Search::Query.new.search(:node, "cluster_name:#{cluster_name}") do |n|
+        # Use Chef Partial Search API to get the needed Chef Node attributes only instead of the whole Node object. This can reduce server response time.
+        # See http://www.opscode.com/blog/2012/10/31/introducing-partial-search-for-opscode-hosted-chef/
+        Chef::Search::Query.new.partial_search(:node, "cluster_name:#{cluster_name}", keys: { name: ['name'] }) do |n|
           nodes.push(n)
         end
         Chef::Log.debug("#{nodes.length} Chef Nodes for cluster #{cluster_name} are returned by Chef Search API: #{nodes}")
@@ -116,8 +118,8 @@ module Ironfan
       while true
         sleep(SLEEP_TIME_INTERVAL)
         nodes = []
-        Chef::Search::Query.new.search(:node, "provides_service:* AND name:#{self.name}*") do |n|
-          nodes.push(n) if nodes_name.include?(n.name)
+        Chef::Search::Query.new.partial_search(:node, "provides_service:* AND name:#{self.name}*", keys: { name: ['name'] }) do |n|
+          nodes.push(n) if nodes_name.include?(n['name'])
         end
         Chef::Log.debug("#{nodes.length} Chef Nodes for cluster #{self.name} are returned by Chef Search API: #{nodes}")
         break if nodes.empty?
