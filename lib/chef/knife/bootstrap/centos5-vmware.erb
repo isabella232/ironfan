@@ -91,8 +91,9 @@ EOP
 <%- end %>
 fi
 
-<%- unless knife_config[:vm_use_default_password] %>
-# Generate random password for VMs
+# Generate password-crypt and serengeti-password script under usr_sbin_path
+# Caution: usr_sbin_path should not be changed, as serengeti-password and password-crypt are public
+#          scripts which will be used by other programs
 <% usr_sbin_path = "/usr/sbin" %>
 (
 cat <<'EOP'
@@ -172,6 +173,8 @@ EOP
 ) > <%= usr_sbin_path %>/serengeti-password
 chmod 775 <%= usr_sbin_path %>/serengeti-password
 
+# Generate random password for VMs 
+<%- unless knife_config[:vm_use_default_password] %>
 (
 cat <<'EOP'
 #!/bin/bash
