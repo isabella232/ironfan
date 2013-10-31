@@ -175,6 +175,10 @@ chmod 775 <%= usr_sbin_path %>/serengeti-password
 
 # Generate random password for VMs 
 <%- unless knife_config[:vm_use_default_password] %>
+
+# create release build flag on the node
+touch /etc/chef/.release_build.lock
+
 (
 cat <<'EOP'
 #!/bin/bash
