@@ -1,4 +1,7 @@
 bash -c '
+# load PATH and other env vars
+source /etc/profile
+
 # explicitly set HOME in case it is overridden by sudo
 HOME=/home/<%= knife_config[:ssh_user] %>
 
@@ -254,10 +257,31 @@ awk NF /tmp/encrypted_data_bag_secret > /etc/chef/encrypted_data_bag_secret
 rm /tmp/encrypted_data_bag_secret
 <% end -%>
 
+# generate Chef Server SSL certificate on Chef Node
+<%- ssl_ca_path = "/etc/chef/trusted_certs" %>
+ssl_ca_path=<%= ssl_ca_path %>
+mkdir -p $ssl_ca_path
+<%-
+home_path = `echo $HOME`.strip
+Dir.glob("#{home_path}/.chefcerts/*.pem").each do |file|
+  cert = File.read(file)
+%>
+(
+cat <<'EOP'
+<%= cert %>
+EOP
+) > <%= ssl_ca_path %>/<%= File.basename(file) %>
+<%- end %>
+
+# generate ssl certificates hash
+c_rehash $ssl_ca_path
+
 (
 cat <<'EOP'
 <%= config_content %>
 no_lazy_load true
+ssl_verify_mode :verify_peer
+ssl_ca_path "<%= ssl_ca_path %>"
 <%= "no_proxy          \"#{knife_config[:bootstrap_no_proxy]}\"" if knife_config[:bootstrap_no_proxy] %>
 EOP
 ) > /etc/chef/client.rb
