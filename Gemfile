@@ -5,6 +5,10 @@ gem 'fog'
 gem 'formatador',    "~> 0.2.1"
 gem 'gorillib',      "~> 0.1.7"
 gem 'cloud-manager'
+gem 'simplecov', '>= 0.4.0', :require => false, :group => :test
+gem 'coveralls', :require => false
+gem 'rspec',       "~> 2.5"
+gem 'simplecov-rcov'
 
 group :development do
   gem 'bundler',     "~> 1"
@@ -17,7 +21,7 @@ end
 group :test do
   gem 'spork',       ">= 0.9.0", :platform => :mri
   gem 'rcov',        ">= 0.9.9", :platform => :ruby_18
-  gem 'simplecov',   ">= 0.5",   :platform => :ruby_19
+  gem 'simplecov',   ">= 0.5",   :platform => :ruby_19, :require => false
   #
   gem 'ruby_gntp'
   gem 'guard',         "~> 1"
