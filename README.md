@@ -1,6 +1,6 @@
 # VMware Serengeti Ironfan
 
-This is a fork of Ironfan project (created by Infochimps) to enable Ironfan work with VMware vSphere 5.0.
+This is a fork of Ironfan project (created by Infochimps) to enable Ironfan work with VMware vSphere vCenter 5.0+ Enterprise Edition.
 
 This fork of Ironfan (VMware Serengeti Ironfan) is part of VMware Serengeti Open Source project, it will be called by VMware Serengeti Server component. However, this Ironfan fork can also work standalone, please read section 'Create a vSphere cluster'.
 

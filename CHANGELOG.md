@@ -1,3 +1,11 @@
+# 3.1.4.serengeti.1.1.0 (2013-11-11)
+
+* Fix incompatibiliy in Ironfan after switching from Chef Server 10 to 11
+* Use Chef 11 Partial Search API to reduce memory consumption and response time 
+* Enable SSL certificate validation between Chef Server and Chef nodes
+* Add Support for Multi Network on VMs
+* Some bug fix and enhancement
+
 # 3.1.4.serengeti.1.0.0 (2013-8-2)
 
 * Limit the number of concurrent bootstrapping nodes to 100 (configurable via knife[:maximum_concurrent_nodes] in .chef/knife.rb) to support large scale cluster provision (200+ nodes)
