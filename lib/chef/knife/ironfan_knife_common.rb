@@ -89,18 +89,7 @@ module Ironfan
       end
 
       Chef::Log.debug("Saving hadoop distro info to Chef Data Bag: #{distro_repo}")
-      data_bag_name = "hadoop_distros"
-      databag = Chef::DataBag.load(data_bag_name) rescue databag = nil
-      if databag.nil?
-        databag = Chef::DataBag.new
-        databag.name(data_bag_name)
-        databag.create
-      end
-      databag_item = Chef::DataBagItem.load(distro_name) rescue databag_item = nil
-      databag_item ||= Chef::DataBagItem.new
-      databag_item.data_bag(data_bag_name)
-      databag_item.raw_data = distro_repo
-      databag_item.save
+      save_databag_item("hadoop_distros", distro_name, distro_repo)
     end
 
     def target_name
@@ -290,22 +279,25 @@ module Ironfan
       target.clear_service_registry_entries
 
       target_name = target.name
-      section("Start bootstrapping nodes in cluster #{target_name}")
-      start_monitor_bootstrap(target)
+      section("Start bootstrapping nodes in cluster #{target_name} at #{Time.now}")
       exit_status = []
-
-      if Chef::Config[:knife][:bootstrap_by_facet]
-        target.cluster.facets.each do |name, facet|
-          servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
-          next if servers.empty?
-          section("Bootstrapping nodes in facet #{name}", :green)
-          exit_status += bootstrap_servers(servers)
+      begin
+        start_monitor_bootstrap(target)
+        if Chef::Config[:knife][:bootstrap_by_facet]
+          target.cluster.facets.each do |name, facet|
+            servers = target.select { |svr| svr.facet_name == facet.name and svr.in_cloud? }
+            next if servers.empty?
+            section("Bootstrapping nodes in facet #{name}", :green)
+            exit_status += bootstrap_servers(servers)
+          end
+        else
+          exit_status = bootstrap_servers(target)
         end
-      else
-        exit_status = bootstrap_servers(target)
+      ensure
+        end_monitor_bootstrap(target)
       end
 
-      ui.info "Bootstrapping cluster #{target_name} completed with exit status #{exit_status.inspect}"
+      ui.info "Bootstrapping cluster #{target_name} completed with exit status #{exit_status.inspect} at #{Time.now}"
       exit_status.select{|i| i != SUCCESS}.empty? ? SUCCESS : BOOTSTRAP_FAILURE
     end
 
@@ -323,44 +315,46 @@ module Ironfan
           step = [step, target.length - start].min
           ui.info "Bootstrapping nodes #{start} to #{start + step - 1} in cluster #{target.name}"
           partial_target = target.slice(start, step)
-          watcher_threads = partial_target.parallelize do |svr|
-            exit_value = bootstrap_server(svr)
-            monitor_bootstrap_progress(partial_target, svr, exit_value)
-            exit_value
-          end
+          watcher_threads = spawn_bootstrap_threads(partial_target)
           exit_status += watcher_threads.map{ |t| t.join.value }
           start += step
         end
       else
-        watcher_threads = target.parallelize do |svr|
-          exit_value = bootstrap_server(svr)
-          monitor_bootstrap_progress(target, svr, exit_value)
-          exit_value
-        end
+        watcher_threads = spawn_bootstrap_threads(target)
         exit_status += watcher_threads.map{ |t| t.join.value }
       end
 
       exit_status
     end
 
+    def spawn_bootstrap_threads(target)
+      target.parallelize do |svr|
+        exit_value = bootstrap_server(svr)
+        monitor_bootstrap_progress(target, svr, exit_value)
+        exit_value
+      end
+    end
+
     def bootstrap_server(server)
-      if server.fog_server.ipaddress.to_s.empty?
+      ip = server.fog_server.ipaddress
+      if ip.to_s.empty?
         ui.error "node #{server.name} doesn't have an IP, will not bootstrap it."
         return BOOTSTRAP_FAILURE
       end
       # Test SSH connection
+      Chef::Log.debug("testing ssh connection to #{ip} of node #{server.name}")
       unless config[:dry_run]
-        20.downto(0) do |i|
-          break if tcp_test_ssh(server.fog_server.ipaddress) 
+        10.downto(0) do |i|
+          break if tcp_test_ssh(ip)
           if i == 0
-            ui.error "node #{server.name} has IP #{server.fog_server.ipaddress}, but not able to ssh to this IP, so will not bootstrap it."
+            ui.error "node #{server.name} has IP #{ip}, but not able to ssh to this IP, so will not bootstrap it."
             return IP_NOT_AVAILABLE
           end
           sleep 3
         end
       end
       # Run Bootstrap
-      run_bootstrap(server, server.fog_server.ipaddress)
+      run_bootstrap(server, ip)
     end
 
     def tcp_test_ssh(hostname)

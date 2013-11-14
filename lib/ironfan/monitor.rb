@@ -29,6 +29,16 @@ module Ironfan
     # Error Message
     ERROR_BOOTSTAP_FAIL ||= 'Bootstrapping VM failed.'
 
+    # flag name for aborting bootstrap
+    ABORT_BOOTSTAP ||= 'abort'
+
+    # Chef Roles which are depended on by other roles during bootstrapping
+    KEY_ROLES ||= [
+      'role[hadoop_namenode]', 'role[hadoop_jobtracker]', 'role[hadoop_resourcemanager]', 'role[hadoop_journalnode]',
+      'role[hadoop_master]', 'role[hbase_master]', 'role[zookeeper]', 'role[hadoop_secondarynamenode]',
+      'role[mapr_zookeeper]', 'role[mapr_mysql_server]'
+    ]
+
     def start_monitor_bootstrap(target)
       Chef::Log.debug("Initialize monitoring bootstrap progress of cluster #{target.name}")
       nodes = cluster_nodes(target)
@@ -44,6 +54,11 @@ module Ironfan
         node.save
       end
 
+      unset_abort_signal(target.cluster_name.to_s)
+    end
+
+    def end_monitor_bootstrap(target)
+      unset_abort_signal(target.cluster_name.to_s)
     end
 
     def start_monitor_progess(target)
@@ -105,6 +120,8 @@ module Ironfan
         attrs[:succeed] = false
         attrs[:status] = STATUS_BOOTSTAP_FAIL
         attrs[:error_msg] = ERROR_BOOTSTAP_FAIL
+
+        handle_node_failure(svr)
       end
       attrs[:action] = ''
       attrs[:progress] = 100
@@ -185,6 +202,70 @@ module Ironfan
         set_provision_attrs(node, get_provision_attrs(node).merge(attrs))
         node.save
       end
+    end
+
+    # If any key nodes (e.g. namenode/jobtracker) failed during bootstrapping, notify all nodes of cluster to stop bootstrapping.
+    def handle_node_failure(server)
+      return if get_abort_signal(server.cluster_name.to_s) # if abort signal already is set, no need to set twice
+      roles = server.combined_run_list
+      roles.each do |role|
+        if KEY_ROLES.include?(role)
+          Chef::Log.error("The node with #{role} failed during bootstrapping.")
+          set_abort_signal(server.cluster_name.to_s)
+          break
+        end
+      end
+    end
+
+    # Set a signal to tell all nodes to stop bootstrapping
+    def set_abort_signal(cluster_name)
+      Chef::Log.info("The abort signal is set to notify all nodes in cluster #{cluster_name} to stop bootstrapping.")
+      save_databag_item(cluster_name, cluster_name, { ABORT_BOOTSTAP => true })
+    end
+
+    # Unset the abort bootstrapping signal
+    def unset_abort_signal(cluster_name)
+      Chef::Log.debug("Unset abort signal.")
+      save_databag_item(cluster_name, cluster_name, { ABORT_BOOTSTAP => false })
+    end
+
+    # Get the abort bootstrapping signal
+    def get_abort_signal(cluster_name)
+      item = get_databag_item(cluster_name, cluster_name)
+      item ? item.raw_data[ABORT_BOOTSTAP] : nil
+    end
+
+    # Save a Chef DataBag Item
+    def save_databag_item(data_bag_name, item_name, item_value)
+      databag = Chef::DataBag.load(data_bag_name) rescue databag = nil
+      if databag.nil?
+        databag = Chef::DataBag.new
+        databag.name(data_bag_name)
+        databag.create
+      end
+
+      databag_item = Chef::DataBagItem.load(data_bag_name, item_name) rescue databag_item = nil
+      databag_item ||= Chef::DataBagItem.new
+      item_value['id'] = item_name
+
+      changed = false
+      item_value.each do |key, value|
+        if databag_item.raw_data[key] != value
+          changed = true
+          break
+        end
+      end
+      if changed
+        databag_item.data_bag(data_bag_name)
+        databag_item.raw_data.merge!(item_value)
+        databag_item.save
+      end
+    end
+
+    # Get a Chef DataBag Item
+    def get_databag_item(data_bag_name, item_name)
+      databag_item = Chef::DataBagItem.load(data_bag_name, item_name) rescue databag_item = nil
+      databag_item
     end
 
     protected
