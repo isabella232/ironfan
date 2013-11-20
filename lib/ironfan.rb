@@ -163,7 +163,7 @@ module Ironfan
     die("'name' of cluster is not specified in #{cluster_def_file}") if !cluster_name
 
     # check whether target cluster file exists
-    Chef::Log.info("cluster filename: #{cluster_filenames.inspect}")
+    Chef::Log.debug("cluster definition files: #{cluster_filenames.inspect}")
     cluster_filename = cluster_filenames[cluster_name]
     if cluster_filename and !overwrite
       die("Cluster #{cluster_name} already exists in #{cluster_filename}. Aborted.")

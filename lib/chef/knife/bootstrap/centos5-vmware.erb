@@ -2,6 +2,9 @@ bash -c '
 # load PATH and other env vars
 source /etc/profile
 
+echo "Current OS version:" `head -1 /etc/issue 2>/dev/null`
+uname -a
+
 # explicitly set HOME in case it is overridden by sudo
 HOME=/home/<%= knife_config[:ssh_user] %>
 
@@ -274,7 +277,7 @@ EOP
 <%- end %>
 
 # generate ssl certificates hash
-c_rehash $ssl_ca_path
+c_rehash $ssl_ca_path >/dev/null
 
 (
 cat <<'EOP'
