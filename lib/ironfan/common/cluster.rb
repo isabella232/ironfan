@@ -92,17 +92,18 @@ module Ironfan
         topology_policy.upcase! if topology_policy
         topology_enabled = (topology_policy and topology_policy != 'NONE')
         topology_hve_enabled = (topology_policy and topology_policy == 'HVE')
+
         topology = self.servers.collect do |svr|
           vm = svr.fog_server
           next if !vm or !vm.ipaddress or !vm.physical_host
           rack = vm.rack.to_s.empty? ? 'default-rack' : vm.rack
           case topology_policy
           when 'RACK_AS_RACK'
-            "#{vm.ipaddress} /#{rack}"
+            vm.all_ip_addresses.collect { |ip| "#{ip} /#{rack}" }.join("\n")
           when 'HOST_AS_RACK'
-            "#{vm.ipaddress} /#{vm.physical_host}"
+            vm.all_ip_addresses.collect { |ip| "#{ip} /#{vm.physical_host}" }.join("\n")
           when 'HVE'
-            "#{vm.ipaddress} /#{rack}/#{vm.physical_host}"
+            vm.all_ip_addresses.collect { |ip| "#{ip} /#{rack}/#{vm.physical_host}" }.join("\n")
           else
             nil
           end
