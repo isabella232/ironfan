@@ -29,6 +29,7 @@ module Ironfan
          attr_accessor :ip_address
          attr_accessor :ip_configs
          attr_accessor :ipaddress
+         attr_accessor :all_ip_addresses
          attr_accessor :public_ip_address
          attr_accessor :private_ip_address
          attr_accessor :volumes
@@ -63,6 +64,14 @@ module Ironfan
             @deleted            = hash["deleted"]
             @ha                 = hash["ha"]
             @created_at         = hash["created_at"]
+
+            all_ips = []
+            @ip_configs.each do |type, network|
+              network.each do |ip|
+                all_ips << ip["ip_address"]
+              end
+            end
+            @all_ip_addresses = all_ips.uniq.compact
 
             node = load_chef_node @name
             if !node.nil? && !node[:provision].nil?
