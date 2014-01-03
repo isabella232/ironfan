@@ -4,7 +4,7 @@ require IRONFAN_DIR("lib/ironfan")
 
 describe Ironfan do
   describe 'create_cluster' do
-    include_context 'dummy_chef'
+    #include_context 'dummy_chef'
 
     before :all do
       initialize_ironfan
@@ -51,7 +51,7 @@ describe Ironfan do
     it 'facet client is correct' do
       facet = @cluster.facet(:client)
       facet.name.should == :client
-      facet.run_list.should == ["role[hadoop_client]", "role[hive]", "role[pig]"]
+      facet.run_list.should == ["role[hadoop_client]", "role[pig]", "role[hive]", "role[hive_server]"]
       facet.instances.should == 1
     end
   end

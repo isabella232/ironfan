@@ -3,8 +3,12 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require IRONFAN_DIR("lib/ironfan")
 
 describe Ironfan::Facet do
-  let(:cluster){ Ironfan.cluster(:gibbon) }
-  let(:facet){
+  let(:cluster) {
+    cluster = Ironfan.cluster(:static, :test)
+    cluster.cloud(:static)
+    cluster
+  }
+  let(:facet) {
     cluster.facet(:namenode) do
       instances 5
     end
@@ -17,7 +21,7 @@ describe Ironfan::Facet do
       facet.server(3){ name(:bob) }
       svrs = facet.servers
       svrs.length.should == 5
-      svrs.map{|svr| svr.name }.should == ["gibbon-namenode-0", "gibbon-namenode-1", "gibbon-namenode-2", :bob, "gibbon-namenode-4"]
+      svrs.map{|svr| svr.name }.should == ["test-namenode-0", "test-namenode-1", "test-namenode-2", :bob, "test-namenode-4"]
     end
 
     it 'servers have bogosity if out of range' do
@@ -27,11 +31,12 @@ describe Ironfan::Facet do
       facet.valid_indexes.should == [0, 1, 2, 3, 4]
     end
 
-    it 'returns all on nil or "", but [] means none' do
+    it 'returns all on nil or "" or []' do
       facet.server(69)
-      facet.slice('' ).map(&:facet_index).should == [0, 1, 2, 3, 4, 69]
+      facet.slice("" ).map(&:facet_index).should == [0, 1, 2, 3, 4, 69]
       facet.slice(nil).map(&:facet_index).should == [0, 1, 2, 3, 4, 69]
-      facet.slice([] ).map(&:facet_index).should == []
+      facet.slice([] ).map(&:facet_index).should == [0, 1, 2, 3, 4, 69]
+      facet.slice([1, 3]).map(&:facet_index).should == [1 ,3]
     end
 
     it 'slice returns all by default' do

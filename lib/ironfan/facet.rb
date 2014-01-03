@@ -124,6 +124,12 @@ module Ironfan
       servers.each(&:resolve!)
     end
 
+    # use cloud_provider of its cluster if cloud_provider not specified
+    def cloud cloud_provider=nil, hsh={}, &block
+      cloud_provider ||= self.cluster.cloud.name
+      super
+    end
+
   protected
 
     # Creates a chef role named for the facet

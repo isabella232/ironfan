@@ -55,11 +55,17 @@ module Ironfan
       Ironfan::ServerSlice.new(cluster, [self])
     end
 
+    # use cloud_provider of its cluster if cloud_provider not specified
+    def cloud cloud_provider=nil, hsh={}, &block
+      cloud_provider ||= self.facet.cloud.name
+      super
+    end
+
     def bogosity val=nil
       @settings[:bogosity] = val  if not val.nil?
       return @settings[:bogosity] if not @settings[:bogosity].nil?
       return :bogus_facet         if facet.bogus?
-      # return :out_of_range      if (self.facet_index.to_i >= facet.instances)
+      return :out_of_range        if (self.facet_index.to_i >= facet.instances)
       false
     end
 

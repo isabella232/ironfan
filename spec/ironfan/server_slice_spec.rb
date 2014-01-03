@@ -3,16 +3,18 @@ require IRONFAN_DIR("lib/ironfan")
 
 describe Ironfan::ServerSlice do
   before do
-    @slice = Ironfan.slice('webserver_demo')
+    @cluster = get_example_cluster('webserver_demo')
+    @slice = @cluster.slice(:webnode)
   end
 
   describe 'attributes' do
     it 'security groups' do
+      @cluster.security_groups.keys.sort.should == [
+        "nfs_client", "ssh", "webserver_demo"
+      ]
       @slice.security_groups.keys.sort.should == [
-        "default",
-        "webserver_demo", "webserver_demo-awesome_website", "webserver_demo-dbnode", "webserver_demo-esnode",
-        "webserver_demo-redis_client", "webserver_demo-redis_server",
-        "webserver_demo-webnode", "nfs_client", "ssh"
+        "nfs_client", "ssh", "webserver_demo",
+        "webserver_demo-redis_client", "webserver_demo-webnode"
       ]
     end
   end

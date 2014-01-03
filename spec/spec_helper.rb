@@ -1,18 +1,15 @@
 require 'rubygems' unless defined?(Gem)
 require 'bundler'
-# begin
-#   Bundler.setup(:default, :development)
-# rescue Bundler::BundlerError => e
-#   $stderr.puts e.message
-#   $stderr.puts "Run `bundle install` to install missing gems"
-#   exit e.status_code
-# end
 require 'spork'
+require 'simplecov'
+require 'simplecov-rcov'
+
 
 unless defined?(IRONFAN_DIR)
   IRONFAN_DIR = File.expand_path(File.dirname(__FILE__)+'/..')
   def IRONFAN_DIR(*paths) File.join(IRONFAN_DIR, *paths); end
   # load from vendored libraries, if present
+  $LOAD_PATH.unshift(IRONFAN_DIR('lib'))
   Dir[IRONFAN_DIR("vendor/*/lib")].each{|dir| p dir ;  $LOAD_PATH.unshift(File.expand_path(dir)) } ; $LOAD_PATH.uniq!
 end
 
@@ -21,13 +18,13 @@ Spork.prefork do # This code is run only once when the spork server is started
   require 'rspec'
   require 'chef'
   require 'chef/knife'
-  require 'fog'
-
-  Fog.mock!
-  Fog::Mock.delay = 0
 
   CHEF_CONFIG_FILE = File.expand_path(IRONFAN_DIR('spec/test_config.rb')) unless defined?(CHEF_CONFIG_FILE)
   Chef::Config.from_file(CHEF_CONFIG_FILE)
+
+  # start SimpleCov
+  SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
+  SimpleCov.start
 
   # Requires custom matchers & macros, etc from files in ./spec_helper/
   Dir[IRONFAN_DIR("spec/spec_helper/*.rb")].each {|f| require f}
@@ -38,7 +35,7 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   def get_example_cluster name
     load_example_cluster(name)
-    Ironfan.cluster(name)
+    Ironfan.load_cluster(name)
   end
 
   def initialize_ironfan
@@ -61,7 +58,7 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   def get_cluster_configuration
     json = JSON.parse(File.read(IRONFAN_DIR('spec/data/cluster_definition.json')))
-    json['cluster_definition']['cluster_configuration']
+    json['cluster_definition']['cluster_configuration'] || {}
   end
 
   def get_facet_configuration(facet_name)

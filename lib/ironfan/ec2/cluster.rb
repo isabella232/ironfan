@@ -20,7 +20,7 @@ require 'ironfan/ec2/server_slice'
 module Ironfan
   module Ec2
 
-    class Cluster < Ironfan::Cluster
+    class Cluster < Ironfan::Common::Cluster
 
       def initialize(*args)
         super(:ec2, *args)
@@ -41,7 +41,12 @@ module Ironfan
       end
 
       def after_cloud_created(attrs)
+        role('ssh')
         create_cluster_security_group unless attrs[:no_security_group]
+      end
+
+      def security_groups
+        cloud.security_groups
       end
 
       # Create a security group named for the cluster
@@ -55,6 +60,14 @@ module Ironfan
 
       def fog_servers
         @fog_servers = @cloud.fog_servers.select{|fs| fs.key_name == cluster_name.to_s && (fs.state != "terminated") }
+      end
+
+      def new_facet(*args)
+        Ironfan::Ec2::Facet.new(*args)
+      end
+
+      def new_slice(*args)
+        Ironfan::Ec2::ServerSlice.new(*args)
       end
 
     end

@@ -18,74 +18,54 @@ describe "ironfan" do
 
       it 'cluster is right' do
         @cluster.to_hash.should == {
-          :name            => :webserver_demo,
-          :run_list        => ["role[base_role]", "role[chef_client]", "role[ssh]", "role[nfs_client]", "role[big_package]", "role[webserver_demo_cluster]"],
-          :chef_attributes => { :webnode_count => 6 },
-          :facet_name    => "webserver_demo_cluster",
-        }
-      end
-
-      it 'defaults cluster' do
-        defaults_cluster = Ironfan.cluster(:defaults)
-        cloud_hash = defaults_cluster.cloud.to_hash
-        [:security_groups, :user_data].each{|k| cloud_hash.delete k }
-        cloud_hash.should == {
-          :availability_zones => ['us-east-1d'],
-          :region             => "us-east-1",
-          :flavor             => "m1.small",
-          :image_name         => "lucid",
-          :backing            => "ebs",
-          :disable_api_termination => false,
-          :public_ip         => false,
-          :bootstrap_distro   => "ubuntu10.04-ironfan",
+          "name"            => :webserver_demo,
+          "chef_attributes" => { "webnode_count" => 6 },
+          "environment" => :_default,
         }
       end
 
       it 'cluster cloud is right' do
         cloud_hash = @cluster.cloud.to_hash
-        [:security_groups, :user_data].each{|k| cloud_hash.delete k }
+        ["security_groups", "user_data"].each{|k| cloud_hash.delete k }
         cloud_hash.should == {
-          :availability_zones => ['us-east-1d'],
-          :region             => "us-east-1",
-          :flavor             => "t1.micro",
-          :image_name         => "maverick",
-          :backing            => "instance",
-          :disable_api_termination => false,
-          :public_ip         => false,
-          :bootstrap_distro   => "ubuntu10.04-ironfan",
-          :keypair            => :webserver_demo,
+          "availability_zones" => ['us-east-1a'],
+          "name"               => :ec2,
+          "flavor"             => "t1.micro",
+          "image_name"         => "maverick",
+          "backing"            => "instance",
         }
       end
 
       it 'facet cloud is right' do
         cloud_hash = @cluster.facet(:webnode).cloud.to_hash
-        [:security_groups, :user_data].each{|k| cloud_hash.delete k }
+        ["security_groups", "user_data"].each{|k| cloud_hash.delete k }
         cloud_hash.should == {
-          :backing            => "ebs",
+          "name"               => :ec2,
+          "backing"            => "ebs",
         }
       end
 
-      it 'webnode facets are right' do
+      it 'webnode facet are right' do
         @cluster.facets.length.should == 3
         fct = @cluster.facet(:webnode)
         fct.to_hash.should == {
-          :name            => :webnode,
-          :run_list        => ["role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]", "role[webserver_demo_webnode]"],
-          :chef_attributes => {:split_testing=>{:group=>"A"}},
-          :facet_role      => "webserver_demo_webnode",
-          :instances       => 6,
+          "name"            => :webnode,
+          "chef_attributes" => {"split_testing" => {"group" => "A"}},
+          "instances"       => 6,
         }
+        fct.facet_role.name.should == "webserver_demo-webnode-facet"
+        fct.run_list.should == ["role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]"]
       end
 
-      it 'dbnode facets are right' do
+      it 'dbnode facet are right' do
         fct = @cluster.facet(:dbnode)
         fct.to_hash.should == {
-          :name            => :dbnode,
-          :run_list        => ["role[mysql_server]", "role[redis_client]", "role[webserver_demo_dbnode]" ],
-          :chef_attributes => {},
-          :facet_role      => "webserver_demo_dbnode",
-          :instances       => 2,
+          "name"            => :dbnode,
+          "chef_attributes" => {},
+          "instances"      => 2
         }
+        fct.facet_role.name.should == "webserver_demo-dbnode-facet"
+        fct.run_list.should == ["role[mysql_server]", "role[redis_client]"]
         fct.cloud.flavor.should == 'c1.xlarge'
         fct.server(0).cloud.flavor.should == 'm1.large'
       end
@@ -93,101 +73,104 @@ describe "ironfan" do
       it 'esnode facets are right' do
         fct = @cluster.facet(:esnode)
         fct.to_hash.should == {
-          :name            => :esnode,
-          :run_list        => ["role[nginx]", "role[redis_server]", "role[elasticsearch_datanode]", "role[elasticsearch_httpnode]", "role[webserver_demonode]"],
-          :chef_attributes => {},
-          :facet_role      => "webserver_demonode",
-          :instances       => 1,
+          "name"            => :esnode,
+          "chef_attributes" => {},
+          "instances"       => 1,
         }
+        fct.facet_role.name.should == "webserver_demo-esnode-facet"
+        fct.run_list.should == ["role[nginx]", "role[redis_server]", "role[elasticsearch_data_esnode]", "role[elasticsearch_http_esnode]"]
         fct.cloud.flavor.should == 'm1.large'
       end
 
       it 'cluster security groups are right' do
         gg = @cluster.security_groups
-        gg.keys.should == ['default', 'ssh', 'nfs_client', 'webserver_demo']
+        gg.keys.should == ['ssh', 'webserver_demo', 'nfs_client']
       end
 
       it 'facet webnode security groups are right' do
         gg = @cluster.facet(:webnode).security_groups
-        gg.keys.sort.should == ["default", "webserver_demo", "webserver_demo-awesome_website", "webserver_demo-redis_client", "webserver_demo-webnode", "nfs_client", "ssh"]
-        gg['webserver_demo-awesome_website'].range_authorizations.should == [[80..80, "0.0.0.0/0", "tcp"], [443..443, "0.0.0.0/0", "tcp"]]
+        gg.keys.sort.should == ["nfs_client", "ssh", "webserver_demo", "webserver_demo-redis_client", "webserver_demo-webnode"]
       end
 
       it 'facet dbnode security groups are right' do
         gg = @cluster.facet(:dbnode).security_groups
-        gg.keys.sort.should == ["default", "webserver_demo", "webserver_demo-dbnode", "webserver_demo-redis_client", "nfs_client", "ssh"]
+        gg.keys.sort.should == ["nfs_client", "ssh", "webserver_demo", "webserver_demo-dbnode", "webserver_demo-redis_client"]
       end
 
       it 'facet esnode security groups are right' do
         gg = @cluster.facet(:esnode).security_groups
-        gg.keys.sort.should == ["default", "webserver_demo", "webserver_demo-esnode", "webserver_demo-redis_server", "nfs_client", "ssh"]
-        gg['webserver_demo-redis_server'][:name].should == "webserver_demo-redis_server"
-        gg['webserver_demo-redis_server'][:description].should == "ironfan generated group webserver_demo-redis_server"
+        gg.keys.sort.should == ["nfs_client", "ssh", "webserver_demo", "webserver_demo-esnode", "webserver_demo-redis_server"]
+        gg['webserver_demo-redis_server'].name.should == "webserver_demo-redis_server"
+        gg['webserver_demo-redis_server'].description.should == "ironfan generated group webserver_demo-redis_server"
         gg['webserver_demo-redis_server'].group_authorizations.should == [['webserver_demo-redis_client', nil]]
       end
 
       it 'has servers' do
         @cluster.servers.map(&:fullname).should == [
+          "webserver_demo-webnode-0", "webserver_demo-webnode-1", "webserver_demo-webnode-2", "webserver_demo-webnode-3", "webserver_demo-webnode-4", "webserver_demo-webnode-5",
           "webserver_demo-dbnode-0", "webserver_demo-dbnode-1",
           "webserver_demo-esnode-0",
-          "webserver_demo-webnode-0", "webserver_demo-webnode-1", "webserver_demo-webnode-2", "webserver_demo-webnode-3", "webserver_demo-webnode-4", "webserver_demo-webnode-5"
         ]
       end
 
       describe 'resolving servers gets right' do
         before do
           @server = @cluster.slice(:webnode, 5).first
-          @server.cloud.stub!(:validation_key).and_return("I_AM_VALID")
+          @server.cloud.stub(:validation_key).and_return("I_AM_VALID")
           @server.resolve!
         end
 
-        it 'attributes' do
+        it 'node attributes' do
           @server.to_hash.should == {
-            :name            => 'webserver_demo-webnode-5',
-            :run_list        => ["role[base_role]", "role[chef_client]", "role[ssh]", "role[nfs_client]", "role[big_package]", "role[webserver_demo_cluster]", "role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]", "role[webserver_demo_webnode]"],
-            :instances => 6,
-            :chef_attributes => {
-              :split_testing  => {:group=>"B"},
-              :webnode_count  => 6,
-              :node_name      => "webserver_demo-webnode-5",
-              :cluster_name => :webserver_demo, :facet_name => :webnode, :facet_index => 5,
+            "name"            => 'webserver_demo-webnode-5',
+            "run_list"        => ["role[ssh]", "role[nfs_client]", "role[big_package]", "role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]", "role[webserver_demo-cluster]", "role[webserver_demo-webnode-facet]"],
+            "instances" => 6,
+            "environment" => :_default,
+            "chef_attributes" => {
+              "split_testing"  => {"group"=>"B"},
+              # TODO the below means we have to include chef_attributes of the node's facet and cluster
+              #"webnode_count"  => 6,
+              #"node_name"      => "webserver_demo-webnode-5",
+              #"cluster_name" => :webserver_demo, "facet_name" => :webnode, "facet_index" => 5,
             },
           }
         end
 
         it 'security groups' do
-          @server.security_groups.keys.sort.should == ['default', 'webserver_demo', 'webserver_demo-awesome_website', 'webserver_demo-redis_client', 'webserver_demo-webnode', 'nfs_client', 'ssh']
+          @server.security_groups.keys.sort.should == ["nfs_client", "ssh", "webserver_demo", "webserver_demo-redis_client", "webserver_demo-webnode"]
         end
+
         it 'run list' do
-          @server.run_list.should == ["role[base_role]", "role[chef_client]", "role[ssh]", "role[nfs_client]", "role[big_package]", "role[webserver_demo_cluster]", "role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]", "role[webserver_demo_webnode]"]
+          @server.combined_run_list.should == ["role[ssh]", "role[nfs_client]", "role[big_package]", "role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]", "role[webserver_demo-cluster]", "role[webserver_demo-webnode-facet]"]
         end
 
-        it 'user_data' do
+        it 'user data' do
           @server.cloud.user_data.should == {
-            "chef_server"            => "https://api.opscode.com/organizations/infochimps",
-            "validation_client_name" => "chef-validator",
-            "validation_key"         => "I_AM_VALID",
+            "chef_server" => ENV['CHEF_SERVER_URL'],
+            "cluster_name" => :webserver_demo,
+            "facet_index" => 5,
+            "facet_name" => :webnode,
+            "node_name" => "webserver_demo-webnode-5",
+            "organization" => nil,
+            "run_list" => ["role[ssh]", "role[nfs_client]", "role[big_package]", "role[nginx]", "role[redis_client]", "role[mysql_client]", "role[elasticsearch_client]", "role[awesome_website]", "role[webserver_demo-cluster]", "role[webserver_demo-webnode-facet]"],
+            "validation_client_name" => "chef-validator"
           }
         end
 
-        it 'cloud settings' do
+        it 'server cloud' do
           hsh = @server.cloud.to_hash
-          hsh.delete(:security_groups)
-          hsh.delete(:user_data)
+          ["security_groups", "user_data"].each{|k| hsh.delete k }
           hsh.should == {
-            :availability_zones => ["us-east-1c"],
-            :region             => "us-east-1",
-            :flavor             => "t1.micro",
-            :image_name         => "maverick",
-            :backing            => "ebs",
-            :disable_api_termination => false,
-            :public_ip         => false,
-            :bootstrap_distro   => "ubuntu10.04-ironfan",
-            :keypair            => :webserver_demo,
+            "name"               => :ec2,
+            "availability_zones" => ["us-east-1c"],
+            "flavor"             => "t1.micro",
+            "image_name"         => "maverick",
+            "backing"            => "ebs",
+            "keypair" => :webserver_demo,
           }
         end
-
       end
     end
+
   end
 end

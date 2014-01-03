@@ -85,7 +85,7 @@ module Ironfan
         distro_repo['is_install_from_tarball'] = is_install_from_tarball
         distro_repo['id'] = distro_name
       rescue StandardError => e
-        raise e, "Malformed hadoop distro info in cluster definition file."
+        raise "Malformed hadoop distro info in cluster definition file: #{e}"
       end
 
       Chef::Log.debug("Saving hadoop distro info to Chef Data Bag: #{distro_repo}")

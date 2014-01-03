@@ -1,5 +1,6 @@
 Ironfan.cluster :ec2, 'webserver_demo' do
-  cloud do
+
+  cloud :ec2 do
     backing             "instance"
     image_name          "maverick"
     flavor              "t1.micro"
@@ -16,7 +17,7 @@ Ironfan.cluster :ec2, 'webserver_demo' do
     role                "mysql_client"
     role                "elasticsearch_client"
     role                "awesome_website"
-    #
+
     cloud.backing       "ebs"
     azs = ['us-east-1a', 'us-east-1b', 'us-east-1c']
     (0...instances).each do |idx|
@@ -44,10 +45,10 @@ Ironfan.cluster :ec2, 'webserver_demo' do
     volume(:data) do
       size          50
       keep          true
+      create_at_launch true
       device        '/dev/sdi'
       mount_point   '/data/db'
       mount_options 'defaults,nouuid,noatime'
-      fs_type       'xfs'
     end
     server(0).volume(:data).snapshot_id 'snap-d9c1edb1'
     server(1).volume(:data) do

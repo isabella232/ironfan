@@ -15,10 +15,22 @@
 
 module Ironfan
   module Ec2
-    class Facet < Ironfan::Cluster
+    class Facet < Ironfan::Common::Facet
+
+      def new_server(*args)
+        Ironfan::Ec2::Server.new(*args)
+      end
+
+      def new_slice(*args)
+        Ironfan::Ec2::ServerSlice.new(*args)
+      end
 
       def after_cloud_created(attrs)
         create_facet_security_group unless attrs[:no_security_group]
+      end
+
+      def security_groups
+        cluster.security_groups.merge(cloud.security_groups)
       end
 
       # Create a security group named for the facet

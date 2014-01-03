@@ -38,6 +38,10 @@ module Ironfan
         cloud.default_availability_zone
       end
 
+      def security_groups
+        facet.security_groups.merge(cloud.security_groups)
+      end
+
       #
       # Override VM actions methods defined in base class
       #
@@ -109,7 +113,7 @@ module Ironfan
             :index              => facet_index, },
           :user_data            => JSON.pretty_generate(user_data_hsh),
           :block_device_mapping => block_device_mapping,
-          :availability_zone    => default_availability_zonel,
+          :availability_zone    => default_availability_zone,
           :monitoring           => cloud.monitoring,
           # :disable_api_termination => cloud.permanent,
           # :instance_initiated_shutdown_behavior => instance_initiated_shutdown_behavior,

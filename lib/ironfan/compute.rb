@@ -24,13 +24,14 @@ module Ironfan
   #
   class ComputeBuilder < Ironfan::DslObject
     attr_reader :cloud, :volumes, :chef_roles
-    has_keys :name, :bogosity, :environment
+    has_keys :name, :bogosity, :environment, :chef_attributes
     @@role_implications ||= Mash.new
     @@run_list_rank     ||= 0
 
     def initialize(builder_name, attrs={})
       super(attrs)
       set :name, builder_name
+      set :chef_attributes, Mash.new
       @run_list_info = attrs[:run_list] || Mash.new
       @volumes = Mash.new
     end
@@ -57,7 +58,7 @@ module Ironfan
     #   end
     #
     def cloud cloud_provider=nil, hsh={}, &block
-      return @cloud if @cloud or cloud_provider.nil?
+      return @cloud if @cloud
       case cloud_provider
         when :ec2
           @cloud ||= Ironfan::Ec2::Cloud.new(self)

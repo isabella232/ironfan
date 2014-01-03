@@ -1,127 +1,308 @@
 {
-  "cluster_definition": {
+  "cluster_data": {
     "name": "hadoop_cluster_test",
-    "template_id": "the_vm_template_id",
     "distro": "apache",
-    "distro_map": {
-       "hadoop": "http://localhost/distros/apache/hadoop.tar.gz",
-       "pig": "http://localhost/distros/apache/pig.tar.gz",
-       "hive": "http://localhost/distros/apache/hive.tar.gz"
-    },
+    "distro_vendor": "Apache",
+    "instance_num": 5,
+    "status": "PROVISIONING",
+    "rack_topology_policy": "NONE",
     "groups": [
       {
-        "name": "master",
-        "roles": ["hadoop_namenode", "hadoop_jobtracker"],
+        "name": "client",
+        "roles": [
+          "hadoop_client",
+          "pig",
+          "hive",
+          "hive_server"
+        ],
+        "cpu": 1,
+        "memory": 3748,
+        "swap_ratio": 1.0,
+        "storage": {},
         "instance_num": 1,
-        "cpu": 2, // CPU core number
-        "memory": 2048, // 2048M
-        "networking": {
-          "port_group": "VM Network"
-        },
-        "storage": {
-          "type": "shared",
-          "size": 10 // 10G
+        "instances": [
+          {
+            "name": "hadoop_cluster_test-client-0",
+            "moid": "null:VirtualMachine:vm-13234",
+            "hostname": "node-02.domain.com",
+            "ip_configs": {
+              "MGT_NETWORK": [
+                {
+                  "ip_address": "192.168.1.30",
+                  "port_group_name": "portgroup-1g",
+                  "network_name": "defaultNetwork",
+                  "traffic_type": "MGT_NETWORK"
+                }
+              ]
+            },
+            "status": "VM Ready",
+            "roles": [
+              "hadoop_client",
+              "pig",
+              "hive",
+              "hive_server"
+            ],
+            "memory": 3748,
+            "volumes": [
+              "DATA:6000C29f-1ddc-3591-8b20-5825e77eb530",
+              "SWAP:6000C29b-6d00-bc6c-bce7-6a05df1ab785"
+            ],
+            "cpuNumber": 1
+          }
+        ],
+        "placement_policies": {
+          "group_associations": []
         }
       },
       {
         "name": "worker",
-        "roles": ["hadoop_datanode", "hadoop_tasktracker"],
+        "roles": [
+          "hadoop_datanode",
+          "hadoop_tasktracker"
+        ],
+        "cpu": 1,
+        "memory": 3748,
+        "swap_ratio": 1.0,
+        "storage": {},
         "instance_num": 3,
-        "cpu": 2,
-        "memory": 2048,
-        "networking": {
-          "port_group": "VM Network"
-        },
-        "storage": {
-          "type": "local",
-          "size": 50
+        "instances": [
+          {
+            "name": "hadoop_cluster_test-worker-0",
+            "moid": "null:VirtualMachine:vm-13231",
+            "hostname": "node-02.domain.com",
+            "ip_configs": {
+              "MGT_NETWORK": [
+                {
+                  "ip_address": "192.168.1.171",
+                  "port_group_name": "portgroup-1g",
+                  "network_name": "defaultNetwork",
+                  "traffic_type": "MGT_NETWORK"
+                }
+              ]
+            },
+            "status": "VM Ready",
+            "roles": [
+              "hadoop_datanode",
+              "hadoop_tasktracker"
+            ],
+            "memory": 3748,
+            "volumes": [
+              "DATA:6000C298-30e7-2d77-8b22-da62cbe25156",
+              "DATA:6000C297-0ab2-398c-4ff7-b3a4df4c9020",
+              "SWAP:6000C293-6337-6e10-6f2b-cb2b451693e6"
+            ],
+            "cpuNumber": 1
+          },
+          {
+            "name": "hadoop_cluster_test-worker-1",
+            "moid": "null:VirtualMachine:vm-13235",
+            "hostname": "node-01.domain.com",
+            "ip_configs": {
+              "MGT_NETWORK": [
+                {
+                  "ip_address": "192.168.1.237",
+                  "port_group_name": "portgroup-1g",
+                  "network_name": "defaultNetwork",
+                  "traffic_type": "MGT_NETWORK"
+                }
+              ]
+            },
+            "status": "VM Ready",
+            "roles": [
+              "hadoop_datanode",
+              "hadoop_tasktracker"
+            ],
+            "memory": 3748,
+            "volumes": [
+              "DATA:6000C297-5f95-98a5-775e-a75700b6e537",
+              "DATA:6000C296-464a-4d4d-b53a-0940a9108179",
+              "DATA:6000C29f-3f7c-28bb-10ef-6010ace97a74",
+              "DATA:6000C294-2910-75f4-7962-d7e8cd36d062",
+              "DATA:6000C296-e01d-4d9b-3ccb-9ff1eef510bc",
+              "DATA:6000C294-6c37-0b42-dbdb-3dfdc18c92b5",
+              "DATA:6000C29b-89ef-be98-704a-0c48ce53207a",
+              "DATA:6000C29a-0f2f-f9b5-d916-08ee3f56fb40",
+              "DATA:6000C29e-0bd3-aa6b-c7b3-5b1fc8426bd4",
+              "SWAP:6000C292-d4a9-db48-2418-b16739fe9f08"
+            ],
+            "cpuNumber": 1
+          },
+          {
+            "name": "hadoop_cluster_test-worker-2",
+            "moid": "null:VirtualMachine:vm-13237",
+            "hostname": "node-03.domain.com",
+            "ip_configs": {
+              "MGT_NETWORK": [
+                {
+                  "ip_address": "192.168.2.140",
+                  "port_group_name": "portgroup-1g",
+                  "network_name": "defaultNetwork",
+                  "traffic_type": "MGT_NETWORK"
+                }
+              ]
+            },
+            "status": "VM Ready",
+            "roles": [
+              "hadoop_datanode",
+              "hadoop_tasktracker"
+            ],
+            "memory": 3748,
+            "volumes": [
+              "DATA:6000C29f-6590-3677-8112-a5eded873468",
+              "DATA:6000C294-6dae-5264-72dd-80c5bdbacfa6",
+              "DATA:6000C29a-7796-f4fc-8709-2bb1e5e6ad82",
+              "DATA:6000C29a-b237-0b60-9f15-163acda5668e",
+              "DATA:6000C299-42f8-f5d5-37fc-786347f6fbf3",
+              "DATA:6000C29d-d261-9e9f-bdc6-8381fd3a7f64",
+              "SWAP:6000C294-4001-b13a-841b-d6313ba89340"
+            ],
+            "cpuNumber": 1
+          }
+        ],
+        "placement_policies": {
+          "group_associations": []
         }
       },
       {
-        "name": "client",
-        "roles": ["hadoop_client", "hive", "pig"],
+        "name": "master",
+        "roles": [
+          "hadoop_namenode",
+          "hadoop_jobtracker"
+        ],
+        "cpu": 2,
+        "memory": 7500,
+        "swap_ratio": 1.0,
+        "storage": {},
         "instance_num": 1,
-        "cpu": 1,
-        "memory": 1024,
-        "networking": {
-          "port_group": "VM Network"
-        },
-        "storage": {
-          "type": "shared",
-          "size": 20
-        },
-        "cluster_configuration": {
-          "hadoop": {
-            "core-site.xml" : {
-              "sample.test.int": "4",
-              "sample.test.string": "facet_client"
+        "instances": [
+          {
+            "name": "hadoop_cluster_test-master-0",
+            "moid": "null:VirtualMachine:vm-13232",
+            "hostname": "node-04.domain.com",
+            "ip_configs": {
+              "MGT_NETWORK": [
+                {
+                  "ip_address": "192.168.2.154",
+                  "port_group_name": "portgroup-1g",
+                  "network_name": "defaultNetwork",
+                  "traffic_type": "MGT_NETWORK"
+                }
+              ]
             },
-            "hdfs-site.xml" : {
-              "dfs.replication": "4"
-            },
-            "mapred-site.xml" : {
-              "mapred.map.tasks": "4"
-            },
-            "hadoop-env.sh" : {
-              "JAVA_HOME": "/usr/java/latest"
-            },
-            "log4j.properties" : {
-              "hadoop.root.logger": "DEBUG,console"
-            }
+            "status": "VM Ready",
+            "roles": [
+              "hadoop_namenode",
+              "hadoop_jobtracker"
+            ],
+            "memory": 7500,
+            "volumes": [
+              "DATA:6000C29f-1a24-3aaf-a529-6fadd22dcf99",
+              "SWAP:6000C29e-edd2-362e-9a23-70b0d108272e"
+            ],
+            "cpuNumber": 2
           }
+        ],
+        "placement_policies": {
+          "group_associations": []
         }
       }
     ],
-    "cluster_configuration": {
-      "hadoop": {
-        "core-site.xml": {
-          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
-          // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
-          // "io.file.buffer.size": "4096",
-          "sample.test.int": "3",
-          "sample.test.string": "cluster"
-        },
-        "hdfs-site.xml": {
-          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
-          // "dfs.replication": "3"
-        },
-        "mapred-site.xml": {
-          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
-          // "mapred.map.tasks": "3"
-        },
-        "hadoop-env.sh": {
-          // "JAVA_HOME": "",
-          // "HADOOP_HEAPSIZE": "",
-          // "HADOOP_NAMENODE_OPTS": "",
-          // "HADOOP_DATANODE_OPTS": "",
-          // "HADOOP_SECONDARYNAMENODE_OPTS": "",
-          // "HADOOP_JOBTRACKER_OPTS": "",
-          // "HADOOP_TASKTRACKER_OPTS": "",
-          // "PATH": "",
-        },
-        "log4j.properties": {
-          // "hadoop.root.logger": "DEBUG,console",
-          // "hadoop.security.logger": "DEBUG,console",
-        }
-      }
-    }
+    "resourcepools": [
+      {}
+    ],
+    "disk_priority": "NORMAL"
   },
   "cloud_provider": {
-    "name": "vsphere",
-    "vc_addr": "vc_server_ip",
-    "vc_user": "administrator",
-    "vc_pwd": "the_password",
-    "vc_datacenter": "the_datacenter_name",
-    "vc_clusters": [
+    "name": "static",
+    "type": "VC"
+  },
+  "cluster_definition": {
+    "name": "hadoop_cluster_test",
+    "groups": [
       {
-        "name": "cluster-ironfan",
-        "vc_rps": ["IronfanRP"]
+        "name": "master",
+        "roles": [
+          "hadoop_namenode",
+          "hadoop_jobtracker"
+        ],
+        "instance_num": 1,
+        "storage": {},
+        "cpu": 2,
+        "memory": 7500,
+        "swap_ratio": 1.0,
+        "ha": "on",
+        "vm_folder_path": "SERENGETI-vApp-MYBDE/hadoop_cluster_test/master"
+      },
+      {
+        "name": "worker",
+        "roles": [
+          "hadoop_datanode",
+          "hadoop_tasktracker"
+        ],
+        "instance_num": 3,
+        "storage": {},
+        "cpu": 1,
+        "memory": 3748,
+        "swap_ratio": 1.0,
+        "ha": "off",
+        "vm_folder_path": "SERENGETI-vApp-MYBDE/hadoop_cluster_test/worker"
+      },
+      {
+        "name": "client",
+        "roles": [
+          "hadoop_client",
+          "pig",
+          "hive",
+          "hive_server"
+        ],
+        "instance_num": 1,
+        "storage": {},
+        "cpu": 1,
+        "memory": 3748,
+        "swap_ratio": 1.0,
+        "ha": "off",
+        "vm_folder_path": "SERENGETI-vApp-MYBDE/hadoop_cluster_test/client"
       }
     ],
-    "vc_shared_datastore_pattern": [ "ds-shared*" ],
-    "vc_local_datastore_pattern": [ "ds-local*" ],
-    "cloud_adapter": "fog"
+    "distro": "apache",
+    "distro_vendor": "Apache",
+    "distro_version": "1.2.1",
+    "http_proxy": "",
+    "no_proxy": "",
+    "vc_clusters": [
+      {
+        "name": "dev-1",
+        "vc_rps": [
+          "huhui"
+        ]
+      }
+    ],
+    "template_id": "centos57-x64",
+    "networkings": [
+      {
+        "port_group": "portgroup-1g",
+        "type": "dhcp"
+      }
+    ],
+    "distro_map": {
+      "hadoop": "https://bde-server-fqdn/distros/apache/1.2.1/hadoop-1.2.1.tar.gz",
+      "pig": "https://bde-server-fqdn/distros/apache/1.2.1/pig-0.11.1.tar.gz",
+      "hive": "https://bde-server-fqdn/distros/apache/1.2.1/hive-0.10.0.tar.gz",
+      "hbase": "https://bde-server-fqdn/distros/apache/1.2.1/hbase-0.94.10.tar.gz",
+      "zookeeper": "https://bde-server-fqdn/distros/apache/1.2.1/zookeeper-3.4.5.tar.gz"
+    },
+    "rack_topology_policy": "NONE",
+    "rack_topology": {},
+    "vc_shared_datastore_pattern": [
+      "Enclosure_Local_Disk*",
+      "ds-ironfan*"
+    ],
+    "vc_local_datastore_pattern": [
+      "Enclosure_Local_Disk*",
+      "ds-ironfan"
+    ]
   },
-  "system_properties": {
-  }
+  "targets": [
+    "hadoop_cluster_test"
+  ]
 }
