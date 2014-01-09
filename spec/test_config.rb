@@ -6,7 +6,7 @@ organization  = ENV['CHEF_ORG'] || 'chef'
 username      = ENV['CHEF_USERNAME'] || 'serengeti'
 cookbook_root = ENV['CHEF_COOKBOOK_REPOS'] || File.expand_path('../../pantry', File.dirname(__FILE__))
 
-ironfan_path    File.expand_path(cookbook_root + '/../ironfan')
+ironfan_path    File.expand_path('..', File.dirname(__FILE__))
 keypair_path    ENV['CHEF_SERVER_KEYPAIR_PATH'] || chef_dir
 
 cookbook_path   [ "cookbooks"].map{|path| File.join(cookbook_root, path) }

@@ -1,3 +1,4 @@
+=begin
 shared_context 'dummy_chef' do
   before(:each) do
     Chef::Log.logger = Logger.new(StringIO.new)
@@ -23,3 +24,4 @@ shared_context 'dummy_chef' do
     Ironfan::Server.stub(:chef_node).and_return( dummy_node )
   end
 end
+=end
