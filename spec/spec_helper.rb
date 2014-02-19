@@ -24,7 +24,15 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   # start SimpleCov
   SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
-  SimpleCov.start
+  SimpleCov.start do
+    # We only use static provider now, code of ec2 and ruby vsphere cloud provider is not used in production now.
+    # So filter them out of coverage report.
+    add_filter "lib/ironfan/ec2/"
+    add_filter "lib/ironfan/vsphere/"
+    add_filter "lib/ironfan/private_key.rb"
+    add_filter "lib/ironfan/security_group.rb"
+    add_filter "lib/ironfan/deprecated.rb"
+  end
 
   # Requires custom matchers & macros, etc from files in ./spec_helper/
   Dir[IRONFAN_DIR("spec/spec_helper/*.rb")].each {|f| require f}
