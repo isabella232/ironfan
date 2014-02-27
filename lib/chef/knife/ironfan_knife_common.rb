@@ -14,9 +14,12 @@
 #
 
 require 'chef/knife'
+require 'ironfan/constants'
 
 module Ironfan
   module KnifeCommon
+
+    include Ironfan::Error
 
     # Exit Status of Knife commands
     SUCCESS ||= 0
@@ -26,7 +29,6 @@ module Ironfan
     DELETE_FAILURE ||= 4
     STOP_FAILURE ||= 5
     START_FAILURE ||= 6
-    IP_NOT_AVAILABLE ||= 31
 
     MAXIMUM_CONCURRENT_NODES ||= 100
 
@@ -338,8 +340,11 @@ module Ironfan
     def bootstrap_server(server)
       ip = server.fog_server.ipaddress
       if ip.to_s.empty?
-        ui.error "node #{server.name} doesn't have an IP, will not bootstrap it."
-        return BOOTSTRAP_FAILURE
+        error = IRONFAN_ERRORS[:ERROR_IP_NOT_AVAILABLE]
+        msg = error[:msg] % [server.name]
+        ui.error msg
+        set_error_msg(server.name, msg)
+        return error[:code]
       end
       # Test SSH connection
       Chef::Log.debug("testing ssh connection to #{ip} of node #{server.name}")
@@ -347,8 +352,11 @@ module Ironfan
         10.downto(0) do |i|
           break if tcp_test_ssh(ip)
           if i == 0
-            ui.error "node #{server.name} has IP #{ip}, but not able to ssh to this IP, so will not bootstrap it."
-            return IP_NOT_AVAILABLE
+            error = IRONFAN_ERRORS[:ERROR_CAN_NOT_SSH_TO_NODE]
+            msg = error[:msg] % [server.name, ip]
+            ui.error msg
+            set_error_msg(server.name, msg)
+            return error[:code]
           end
           sleep 3
         end

@@ -13,21 +13,24 @@
 #   limitations under the License.
 #
 
+require 'ironfan/constants'
+
 module Ironfan
   module Monitor
+    include Ironfan::Error
+
     MONITOR_INTERVAL ||= 10
 
     # VM Status
     STATUS_VM_NOT_EXIST ||= 'Not Exist'
-    STATUS_BOOTSTAP_SUCCEED ||= 'Service Ready'
-    STATUS_BOOTSTAP_FAIL ||= 'Bootstrap Failed'
+    STATUS_VM_READY ||= 'VM Ready'
+    STATUS_VM_POWERED_ON ||= 'Powered On'
+    STATUS_VM_POWERED_OFF ||= 'Powered Off'
+    STATUS_BOOTSTRAP_SUCCEED ||= 'Service Ready'
+    STATUS_BOOTSTRAP_FAIL ||= 'Bootstrap Failed'
 
     # Actions being performed on VM
-    ACTION_CREATE_VM ||= 'Creating VM'
     ACTION_BOOTSTRAP_VM ||= 'Bootstrapping VM'
-
-    # Error Message
-    ERROR_BOOTSTAP_FAIL ||= 'Bootstrapping VM failed.'
 
     # flag name for aborting bootstrap
     ABORT_BOOTSTAP ||= 'abort'
@@ -47,9 +50,10 @@ module Ironfan
         attrs[:finished] = false
         attrs[:succeed] = nil
         attrs[:bootstrapped] = false
-        attrs[:status] = 'VM Ready'
+        attrs[:status] = STATUS_VM_READY
         attrs[:progress] = 10
         attrs[:action] = ACTION_BOOTSTRAP_VM
+        attrs[:error_msg] = ''
         set_provision_attrs(node, attrs)
         node.save
       end
@@ -70,6 +74,7 @@ module Ironfan
         attrs[:succeed] = nil
         attrs[:progress] = 0
         attrs[:action] = ''
+        attrs[:error_msg] = ''
         set_provision_attrs(node, attrs)
         node.save
       end
@@ -112,14 +117,15 @@ module Ironfan
         attrs[:finished] = true
         attrs[:bootstrapped] = true
         attrs[:succeed] = true
-        attrs[:status] = STATUS_BOOTSTAP_SUCCEED
+        attrs[:status] = STATUS_BOOTSTRAP_SUCCEED
         attrs[:error_msg] = ''
       else
         attrs[:finished] = true
         attrs[:bootstrapped] = false
         attrs[:succeed] = false
-        attrs[:status] = STATUS_BOOTSTAP_FAIL
-        attrs[:error_msg] = ERROR_BOOTSTAP_FAIL
+        attrs[:status] = STATUS_BOOTSTRAP_FAIL
+        # error_msg will be set by chef-client on the node when chef-client exits
+        attrs[:error_msg] = IRONFAN_ERRORS[:ERROR_BOOTSTRAP_FAILURE][:msg] % [svr.fullname] if attrs[:error_msg].to_s.empty?
 
         handle_node_failure(svr)
       end
@@ -182,24 +188,25 @@ module Ironfan
         attrs = vm ? JSON.parse(vm.to_hash.to_json) : {}
         attrs.delete("action") unless attrs.empty?
         if vm.nil?
-          attrs["status"] = "Not Exist"
+          attrs["status"] = STATUS_VM_NOT_EXIST
           attrs["ip_address"] = nil
         elsif svr.running?
           attrs.delete("status")
           if vm.public_ip_address.nil?
-            attrs["status"] = "Powered On"
+            attrs["status"] = STATUS_VM_POWERED_ON
           else
-            attrs["status"] = "VM Ready"
+            attrs["status"] = STATUS_VM_READY
           end
           if node["provision"]["bootstrapped"]
-            attrs["status"] = "Service Ready"
+            attrs["status"] = STATUS_BOOTSTRAP_SUCCEED
           else
-            attrs["status"] = "Bootstrap Failed"
+            attrs["status"] = STATUS_BOOTSTRAP_FAIL
           end
         else
-          attrs["status"] = "Powered Off"
+          attrs["status"] = STATUS_VM_POWERED_OFF
         end
-        set_provision_attrs(node, get_provision_attrs(node).merge(attrs))
+
+        set_provision_attrs(node, get_provision_attrs(node).merge(attrs.to_mash))
         node.save
       end
     end
@@ -271,12 +278,21 @@ module Ironfan
     protected
 
     def get_provision_attrs(chef_node)
-      chef_node[:provision] ? chef_node[:provision].to_hash : Hash.new
+      chef_node[:provision] ? chef_node[:provision].dup : Mash.new
     end
 
     def set_provision_attrs(chef_node, attrs)
-      chef_node.normal[:provision] = attrs
+      chef_node.normal[:provision] = attrs.to_mash
     end
 
+    def set_error_msg(node_name, msg = '')
+      chef_node = Chef::Node.load(node_name)
+      attrs = get_provision_attrs(chef_node)
+      if attrs[:error_msg] != msg
+        attrs[:error_msg] = msg
+        set_provision_attrs(chef_node, attrs)
+        chef_node.save
+      end
+    end
   end
 end
