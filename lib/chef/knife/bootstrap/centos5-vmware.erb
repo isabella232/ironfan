@@ -69,119 +69,6 @@ mkdir -p /tmp/knife-bootstrap
 chmod 700 /tmp/knife-bootstrap
 cd /tmp/knife-bootstrap
 
-## setup password-less ssh login
-# create .ssh directory
-mkdir -p ~/.ssh
-chmod 700 -R ~/.ssh
-if [ ! -f ~/.ssh/authorized_keys ]; then
-  touch ~/.ssh/authorized_keys
-fi
-chmod 640 ~/.ssh/authorized_keys
-chown -R serengeti.serengeti ~/.ssh
-
-# generate ssh key pair
-<%- home_path = `echo $HOME`.strip %>
-<%- unless File.exist?("#{home_path}/.ssh/id_rsa.pub") %>
-<%- system "ssh-keygen -t rsa -N '' -f #{home_path}/.ssh/id_rsa" %>
-<%- end %>
-
-# copy pub_key to authorized_keys
-<%- pub_key = File.read("#{home_path}/.ssh/id_rsa.pub") %>
-if [ `grep -c "<%= pub_key.strip %>" ~/.ssh/authorized_keys` == 0 ]; then
-<%- unless pub_key.nil? && pub_key.empty? %>
-(
-cat <<'EOP'
-<%= pub_key %>
-EOP
-) >> ~/.ssh/authorized_keys
-<%- end %>
-fi
-
-# Generate password-crypt and serengeti-password script under usr_sbin_path
-# Caution: usr_sbin_path should not be changed, as serengeti-password and password-crypt are public
-#          scripts which will be used by other programs
-<% usr_sbin_path = "/usr/sbin" %>
-(
-cat <<'EOP'
-#!/usr/bin/python
-
-import crypt, string, random, sys
-
-salt_chars = string.ascii_letters + string.digits + "./"
-salt = "".join([random.choice(salt_chars) for x in range(16)])
-
-password = sys.stdin.readline().strip("\n")
-
-encpw = crypt.crypt(password, "\$6\$%s\$" % salt)
-
-sys.stdout.write(encpw + "\n")
-EOP
-) > <%= usr_sbin_path %>/password-crypt
-chmod 775 <%= usr_sbin_path %>/password-crypt
-
-(
-cat <<'EOP'
-#!/bin/bash
-
-# With argument -a, this sets a random password and sets it up to be
-# displayed on the login screen
-# With a argument -u, the user is prompted for the password and the password
-# which is set is not displayed on the screen.
-
-LOGIN_MSG=<%= usr_sbin_path %>/login_msg
-chmod 644 \$LOGIN_MSG
-
-if [ \`id -u\` != 0 ]; then
-  echo "Permission denied: run this script with root user"
-  exit 1
-fi
-
-if [ "\$1" == "-u" ]; then
-   # User set password
-   read -p "New password: " -s p1 && echo && \\
-   read -p "Retype password: " -s p2 && echo
-   if [ \$? != 0 ]; then
-      echo Not changing password
-      exit 1
-   fi
-   if [ "\$p1" != "\$p2" ]; then
-      echo Passwords do not match
-      exit 1
-   fi
-   passwd="\$p1"
-   display_passwd="Password set by user"
-   notification=""
-elif [ "\$1" == "-a" ]; then
-   # Auto generated password
-   passwd=\`openssl rand -base64 6\`
-   if [ \$? != 0 ]; then
-      echo "Error generating random password"
-      exit 1
-   fi
-   display_passwd="\$passwd"
-   notification="You can change password after login using script sudo <%= usr_sbin_path %>/serengeti-password -u"
-else
-   echo "Usage:" "\$0" "[ -a | -u ]"
-   echo "   -a, set password using auto generated password"
-   echo "   -u, user reset password"
-   exit 1
-fi
-
-cryptpasswd=\`echo \$passwd | <%= usr_sbin_path %>/password-crypt\` && \\
-rm -f \$LOGIN_MSG && \\
-
-echo Login password -- "\$display_passwd" >\$LOGIN_MSG && \\
-echo \$notification >> \$LOGIN_MSG && \\
-chmod 600 \$LOGIN_MSG && \\
-/usr/sbin/usermod -p "\$cryptpasswd" root && \\
-if id serengeti >/dev/null 2>&1; then /usr/sbin/usermod -p "\$cryptpasswd" serengeti; fi
-EOP
-) > <%= usr_sbin_path %>/serengeti-password
-chmod 775 <%= usr_sbin_path %>/serengeti-password
-
-# Generate random password for VMs 
-<%- unless knife_config[:vm_use_default_password] %>
-
 # create release build flag on the node
 touch /etc/chef/.release_build.lock
 
@@ -197,7 +84,9 @@ exec </dev/\$tty >/dev/\$tty 2>&1
 stty -echo
 clear
 
-MSG_FILE=<%= usr_sbin_path %>/login_msg
+<% usr_sbin_path = "/usr/sbin" %>
+
+MSG_FILE=/opt/serengeti/etc/login_msg
 if [ -f \$MSG_FILE ]; then
   cat \$MSG_FILE
 fi
@@ -233,12 +122,6 @@ if [ $? == 0 ]; then
   /sbin/initctl stop tty TTY=/dev/tty6
   /sbin/initctl start tty TTY=/dev/tty1
 fi
-
-if [ ! -f <%= usr_sbin_path %>/.serengeti-password.log ]; then
-  <%= usr_sbin_path %>/serengeti-password -a > <%= usr_sbin_path %>/.serengeti-password.log
-fi
-
-<%- end %>
 
 # generate /etc/chef/client.pem
 <%- if @config[:client_key] %>
