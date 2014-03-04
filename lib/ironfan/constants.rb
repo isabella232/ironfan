@@ -4,7 +4,7 @@ module Ironfan
     IRONFAN_ERRORS = {
       :ERROR_BOOTSTRAP_FAILURE => {
         :code => 3,
-        :msg => "Bootstrapping node %s failed."
+        :msg => "Bootstrapping node %s failed. Please ssh to this node and run 'sudo chef-client' to get error details."
       },
       :ERROR_IP_NOT_AVAILABLE => {
         :code => 31,

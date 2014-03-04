@@ -125,6 +125,7 @@ module Ironfan
         attrs[:succeed] = false
         attrs[:status] = STATUS_BOOTSTRAP_FAIL
         # error_msg will be set by chef-client on the node when chef-client exits
+        # if it's not set, set a general error_msg here
         attrs[:error_msg] = IRONFAN_ERRORS[:ERROR_BOOTSTRAP_FAILURE][:msg] % [svr.fullname] if attrs[:error_msg].to_s.empty?
 
         handle_node_failure(svr)
