@@ -4,11 +4,8 @@ require IRONFAN_DIR("lib/ironfan")
 
 describe Ironfan do
   describe 'create_cluster' do
-    #include_context 'dummy_chef'
 
     before :all do
-      initialize_ironfan
-
       @cluster_name = "hadoop_cluster_test"
       @cluster_filename = File.join(Ironfan.cluster_path.first, "#{@cluster_name}.rb")
       File.delete(@cluster_filename) if File.exists?(@cluster_filename)

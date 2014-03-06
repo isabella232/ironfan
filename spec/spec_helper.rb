@@ -37,6 +37,10 @@ Spork.prefork do # This code is run only once when the spork server is started
   # Requires custom matchers & macros, etc from files in ./spec_helper/
   Dir[IRONFAN_DIR("spec/spec_helper/*.rb")].each {|f| require f}
 
+  def initialize_ironfan
+    require IRONFAN_DIR('spec/spec_helper/partial_search')
+  end
+
   def load_example_cluster(name)
     require(IRONFAN_DIR('spec/data/clusters', "#{name}.rb"))
   end
@@ -46,14 +50,19 @@ Spork.prefork do # This code is run only once when the spork server is started
     Ironfan.load_cluster(name)
   end
 
-  def initialize_ironfan
+  def get_knife_create
     require IRONFAN_DIR("lib/chef/knife/cluster_create")
     knife_create = Chef::Knife::ClusterCreate.new
+    knife_create.class.load_deps
     knife_create.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
     knife_create.config[:yes] = true
-    knife_create.config[:verbosity] = 2
-    knife_create.name_args = 'hadoop_cluster_test'
+    knife_create.config[:bootstrap] = true
+    knife_create.config[:skip] = true
+    knife_create.config[:dry_run] = true
+    knife_create.config[:verbosity] = 1
+    knife_create.name_args = ['hadoop_cluster_test']
     knife_create.load_ironfan
+    knife_create
   end
 
   def create_hadoop_cluster_test

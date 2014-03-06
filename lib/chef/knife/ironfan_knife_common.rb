@@ -33,6 +33,7 @@ module Ironfan
     MAXIMUM_CONCURRENT_NODES ||= 100
 
     def self.load_deps
+      require 'json'
       require 'formatador'
       require 'chef/node'
       require 'chef/api_client'
@@ -193,13 +194,9 @@ module Ironfan
       target.display(display_style, &block)
     end
 
-    #
-    # Put Fog into mock mode if --dry_run
-    #
     def configure_dry_run
       if config[:dry_run]
-        Fog.mock!
-        Fog::Mock.delay = 0
+        # TODO
       end
     end
 
@@ -251,8 +248,8 @@ module Ironfan
       ret = 0
       nodename = "node #{node.name} (#{hostname})"
       bs = bootstrapper(node, hostname)
-      if config[:skip].to_s == 'true'
-        ui.info "Skip bootstrapping #{nodename} with #{JSON.pretty_generate(bs.config)}"
+      if config[:dry_run]
+        ui.info "Skip bootstrapping #{nodename} in dry run mode"
       else
         begin
           ui.info "Start bootstrapping #{nodename}"

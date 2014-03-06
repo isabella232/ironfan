@@ -22,7 +22,6 @@ class Chef
       import_banner_and_options(Ironfan::Script)
 
       deps do
-        require 'json'
         Chef::Knife::ClusterLaunch.load_deps
       end
 
