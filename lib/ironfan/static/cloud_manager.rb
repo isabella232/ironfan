@@ -103,7 +103,7 @@ module Ironfan
             attrs[:deleted]       = @deleted
             attrs[:rack]          = @rack
             attrs[:error_code]    = 0
-            attrs[:error_msg]     = 'success'
+            attrs[:error_msg]     = ''
             attrs[:ha]            = @ha
 
             attrs
@@ -156,7 +156,7 @@ module Ironfan
           end
 
           def error_msg
-            'success'
+            ''
           end
         end
 
