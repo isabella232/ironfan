@@ -52,17 +52,41 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   def get_knife_create
     require IRONFAN_DIR("lib/chef/knife/cluster_create")
-    knife_create = Chef::Knife::ClusterCreate.new
-    knife_create.class.load_deps
-    knife_create.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
-    knife_create.config[:yes] = true
-    knife_create.config[:bootstrap] = true
-    knife_create.config[:skip] = true
-    knife_create.config[:dry_run] = true
-    knife_create.config[:verbosity] = 1
-    knife_create.name_args = ['hadoop_cluster_test']
-    knife_create.load_ironfan
-    knife_create
+    knife = Chef::Knife::ClusterCreate.new
+    knife.class.load_deps
+    knife.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
+    knife.config[:yes] = true
+    knife.config[:bootstrap] = true
+    knife.config[:skip] = true
+    knife.config[:dry_run] = true
+    knife.config[:verbosity] = 1
+    knife.name_args = ['hadoop_cluster_test']
+    knife.load_ironfan
+    knife
+  end
+
+  def get_knife_kill
+    require IRONFAN_DIR("lib/chef/knife/cluster_kill")
+    knife = Chef::Knife::ClusterKill.new
+    knife.class.load_deps
+    knife.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
+    knife.config[:yes] = true
+    knife.config[:skip] = true
+    knife.config[:dry_run] = true
+    knife.config[:chef] = true
+    knife.config[:cloud] = false
+    knife.config[:verbosity] = 1
+    knife.name_args = ['hadoop_cluster_test']
+    knife.load_ironfan
+    knife
+  end
+
+  def run_knife(knife)
+    begin
+      knife.run
+    rescue SystemExit => e
+      return e.success?
+    end
   end
 
   def create_hadoop_cluster_test

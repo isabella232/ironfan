@@ -43,7 +43,7 @@ module Ironfan
     ]
 
     def start_monitor_bootstrap(target)
-      Chef::Log.debug("Initialize monitoring bootstrap progress of cluster #{target.name}")
+      Chef::Log.info("Initialize monitoring bootstrap progress of cluster #{target.name}")
       nodes = cluster_nodes(target)
       nodes.each do |node|
         attrs = get_provision_attrs(node)
@@ -66,7 +66,7 @@ module Ironfan
     end
 
     def start_monitor_progess(target)
-      Chef::Log.debug("Initialize monitoring progress of cluster #{target.name}")
+      Chef::Log.info("Initialize monitoring progress of cluster #{target.name}")
       nodes = cluster_nodes(target)
       nodes.each do |node|
         attrs = get_provision_attrs(node)
@@ -108,7 +108,7 @@ module Ironfan
     end
 
     def monitor_bootstrap_progress(target, svr, exit_code)
-      Chef::Log.debug("Monitoring bootstrap progress of cluster #{target.name} with data: #{[exit_code, svr]}")
+      Chef::Log.info("Monitoring bootstrap progress of cluster #{target.name} with data: #{[exit_code, svr]}")
 
       # Save progress data to ChefNode
       node = Chef::Node.load(svr.fullname)

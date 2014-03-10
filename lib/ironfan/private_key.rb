@@ -27,10 +27,6 @@ module Ironfan
 
     def save
       return unless @body
-      if Ironfan.chef_config[:dry_run]
-        Chef::Log.debug("    key #{name} - dry run, not writing out key")
-        return
-      end
       ui.info( "    key #{name} - writing to #{filename}" )
       FileUtils.mkdir_p(File.dirname(filename))
       File.open(filename, "w", 0600){|f| f.print( @body ) }

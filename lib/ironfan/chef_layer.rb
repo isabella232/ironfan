@@ -73,9 +73,7 @@ module Ironfan
     def sync_roles
       step("Syncing cluster and facet roles")
       cluster.sync_cluster_role
-      unless_dry_run do
-        chef_roles.each(&:save)
-      end
+      chef_roles.each(&:save)
     end
 
     def ensure_all_chef_nodes
@@ -163,16 +161,12 @@ module Ironfan
     def delete_chef
       if chef_node   then
         step("  deleting chef node", :red)
-        unless_dry_run do
-          chef_node.destroy
-        end
+        chef_node.destroy
         @chef_node   = nil
       end
       if chef_client
         step("  deleting chef client", :red)
-        unless_dry_run do
-          chef_client.destroy
-        end
+        chef_client.destroy
         @chef_client = nil
       end
       true
@@ -248,9 +242,7 @@ module Ironfan
       set_chef_node_environment
       sync_ipconfig_attribute
       sync_volume_attributes
-      unless_dry_run do
-        chef_api_server_as_client.post_rest('nodes', @chef_node)
-      end
+      chef_api_server_as_client.post_rest('nodes', @chef_node)
     end
 
     # Update the chef client on the server. Do not call this directly -- go
@@ -266,9 +258,7 @@ module Ironfan
       set_chef_node_environment
       sync_ipconfig_attribute
       sync_volume_attributes
-      unless_dry_run do
-        chef_api_server_as_admin.put_rest("nodes/#{@chef_node.name}", @chef_node)
-      end
+      chef_api_server_as_admin.put_rest("nodes/#{@chef_node.name}", @chef_node)
     end
 
     def sync_ipconfig_attribute
@@ -307,10 +297,8 @@ module Ironfan
       # ApiClient#create sends extra params that fail -- we'll do it ourselves
       # purposefully *not* catching the 'but it already exists' error: if it
       # didn't show up in the discovery process, we're in an inconsistent state
-      unless_dry_run do
-        response = chef_api_server_as_admin.post_rest("clients", { 'name' => fullname, 'admin' => false, 'private_key' => true })
-        client_key.body = response['private_key']
-      end
+      response = chef_api_server_as_admin.post_rest("clients", { 'name' => fullname, 'admin' => false, 'private_key' => true })
+      client_key.body = response['private_key']
       client_key.save
       @chef_client
     end

@@ -59,10 +59,6 @@ class Chef
       end
 
       def sync_to_chef(target)
-        if config[:dry_run]
-          ui.info "(can't do a dry-run when syncing to chef -- skipping)"
-          return
-        end
         ui.info "Syncing to Chef:"
         target.sync_to_chef
       end
