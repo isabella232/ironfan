@@ -378,6 +378,11 @@ fi
 <%= start_chef %>
 ret=$?
 
+# the default permission of this error log file is 640 and owner/group is root
+if [ -f /var/chef/cache/chef-stacktrace.out ]; then
+  chmod 644 /var/chef/cache/chef-stacktrace.out
+fi
+
 # kill mingetty or serengeti-tty to force it to respawn. vm console will be refreshed after respawn
 ps -ef | grep -v "grep" | grep "tty1" | awk '"'"'{print $2}'"'"' | xargs kill -9
 
