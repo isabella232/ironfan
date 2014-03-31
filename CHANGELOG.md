@@ -1,3 +1,11 @@
+# 2.0.0 (2014-4-1)
+
+* Rename gem to ironfan_serengeti
+* if any key nodes (e.g. namenode/jobtracker) failed during bootstrapping, notify all nodes of cluster to stop bootstrapping.
+* Save bootstrap error msg to each Chef Nodes
+* Improve Ironfan UT coverage
+* Some bug fix and enhancement
+
 # 3.1.4.serengeti.1.1.0 (2013-11-11)
 
 * Fix incompatibiliy in Ironfan after switching from Chef Server 10 to 11
