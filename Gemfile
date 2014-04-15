@@ -1,14 +1,12 @@
 source "http://rubygems.org"
 
-gem 'chef',          "~> 0.10.4"
-gem 'fog'
+gem 'chef',          "~> 11.4"
 gem 'formatador',    "~> 0.2.1"
 gem 'gorillib',      "~> 0.1.7"
-gem 'cloud-manager'
-gem 'simplecov', '>= 0.4.0', :require => false, :group => :test
+gem 'simplecov',     ">= 0.5", :require => false, :group => :test
+gem 'simplecov-rcov'
 gem 'coveralls', :require => false
 gem 'rspec',       "~> 2.5"
-gem 'simplecov-rcov'
 
 group :development do
   gem 'bundler',     "~> 1"
