@@ -3,6 +3,7 @@
 # Author:: John Keiser (<jkeiser@opscode.com>)
 # Author:: Jesse Hu (<huh@vmware.com>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Portions Copyright (c) 2013-2014 VMware, Inc. All Rights Reserved.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
