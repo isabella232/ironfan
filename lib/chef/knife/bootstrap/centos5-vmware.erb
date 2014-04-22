@@ -229,10 +229,10 @@ if should_continue(machine_id) && !chef_client_is_running? && (node[:forbid_run_
   ret = system("source /etc/profile; <%= start_chef %> > /etc/chef/bootstrap_node.log")
   node = Chef::Node.load("<%= @config[:node].name %>")
   # set node status
-  node[:provision] ||= {}
-  node[:provision][:status] = ret ? "Service Ready" : "Bootstrap Failed"
+  node.normal[:provision] ||= {}
+  node.normal[:provision][:status] = ret ? "Service Ready" : "Bootstrap Failed"
   # set node bootstrapped
-  node[:provision][:bootstrapped] = ret
+  node.normal[:provision][:bootstrapped] = ret
   node.save
 end
 
