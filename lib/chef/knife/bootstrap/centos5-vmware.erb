@@ -72,57 +72,6 @@ cd /tmp/knife-bootstrap
 # create release build flag on the node
 touch /etc/chef/.release_build.lock
 
-(
-cat <<'EOP'
-#!/bin/bash
-
-tty=\`eval echo \\\\\\$\\\${#}\` # get last argument
-tty=\`basename "\$tty"\`
-
-exec </dev/\$tty >/dev/\$tty 2>&1
-
-stty -echo
-clear
-
-<% usr_sbin_path = "/usr/sbin" %>
-
-MSG_FILE=/opt/serengeti/etc/login_msg
-if [ -f \$MSG_FILE ]; then
-  cat \$MSG_FILE
-fi
-
-while read c; do
-  exec /sbin/mingetty --noclear  "\$@"
-done
-EOP
-) > <%= usr_sbin_path %>/serengeti-tty
-chmod 775 <%= usr_sbin_path %>/serengeti-tty
-
-# Show a serengeti welcome screen instead of default login prompt on tty1. tty[2-6] are disabled.
-
-## for CentOS 5
-grep -q "release 5" /etc/redhat-release
-if [ $? == 0 ]; then
-  sed -i "s|^\(1:.*\):/sbin/mingetty|\1:<%= usr_sbin_path %>/serengeti-tty|" /etc/inittab
-  sed -i "s|^\([2-6]:.*/sbin/mingetty\)|#\1|" /etc/inittab
-  /sbin/init q
-fi
-
-## for CentOS 6
-grep -q "release 6" /etc/redhat-release
-if [ $? == 0 ]; then
-  sed -i "s|ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES=/dev/tty[1-1]|g" /etc/sysconfig/init
-  sed -i "s|/sbin/mingetty|<%= usr_sbin_path %>/serengeti-tty|g" /etc/init/tty.conf
-  sed -i "s|ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES=/dev/tty[1-1]|g" /etc/init/start-ttys.conf
-  /sbin/initctl stop tty TTY=/dev/tty1
-  /sbin/initctl stop tty TTY=/dev/tty2
-  /sbin/initctl stop tty TTY=/dev/tty3
-  /sbin/initctl stop tty TTY=/dev/tty4
-  /sbin/initctl stop tty TTY=/dev/tty5
-  /sbin/initctl stop tty TTY=/dev/tty6
-  /sbin/initctl start tty TTY=/dev/tty1
-fi
-
 # generate /etc/chef/client.pem
 <%- if @config[:client_key] %>
 (
