@@ -169,6 +169,7 @@ no_lazy_load true
 ssl_verify_mode :verify_peer
 ssl_ca_path "<%= ssl_ca_path %>"
 <%= "no_proxy          \"#{knife_config[:bootstrap_no_proxy]}\"" if knife_config[:bootstrap_no_proxy] %>
+Ohai::Config[:disabled_plugins] = [:Azure, :Filesystem, :Cloudv2, :Virtualization, :Virtualizationinfo, :Dmi, :Zpools, :Blockdevice, :Lsb, :Nodejs, :Languages, :Php, :Lua, :Perl, :C, :Java, :Python, :Erlang, :Groovy, :Ruby, :Mono, :Os, :Openstack, :Cloud, :Rackspace, :Ps, :Command, :Initpackage, :Rootgroup, :Keys, :Sshhostkey, :Ohai, :Chef, :Ohaitime, :Passwd, :Gce, :Systemprofile, :Linode, :Ipscopes, :Eucalyptus, :Ec2]
 EOP
 ) > /etc/chef/client.rb
 # to be compatible with Chef Client 10
