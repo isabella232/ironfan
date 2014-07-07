@@ -165,6 +165,7 @@ c_rehash $ssl_ca_path >/dev/null
 (
 cat <<'EOP'
 <%= config_content %>
+log_level :info
 no_lazy_load true
 ssl_verify_mode :verify_peer
 ssl_ca_path "<%= ssl_ca_path %>"
