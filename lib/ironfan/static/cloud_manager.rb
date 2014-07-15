@@ -72,24 +72,10 @@ module Ironfan
               end
             end
             @all_ip_addresses = all_ips.uniq.compact
-
-            node = load_chef_node @name
-            if !node.nil? && !node[:provision].nil?
-               node.normal[:provision][:status] = @status
-               node.save
-            end
-         end
-
-         def state
-            node = load_chef_node @name
-            if !node.nil? && !node[:provision].nil?
-               state = node[:provision][:status]
-            end
-            state || @state
          end
 
          def to_hash
-            attrs = {}     
+            attrs = {}
             attrs[:name]          = @name
             attrs[:hostname]      = @hostname
             attrs[:physical_host] = @hostname
