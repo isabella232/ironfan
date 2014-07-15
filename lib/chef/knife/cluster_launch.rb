@@ -86,24 +86,6 @@ class Chef
         end
       end
 
-      def warn_or_die_on_bogus_servers(target)
-        ui.info("")
-        ui.info "Cluster has servers in a transitional or undefined state (shown as 'bogus'):"
-        ui.info("")
-        display(target)
-        ui.info("")
-        unless config[:force]
-          die(
-            "Launch operations may be unpredictable under these circumstances.",
-            "You should wait for the cluster to stabilize, fix the undefined server problems",
-            "(run \"knife cluster show CLUSTER\" to see what the problems are), or launch",
-            "the cluster anyway using the --force option.", "", -2)
-        end
-        ui.info("")
-        ui.info "--force specified"
-        ui.info "Proceeding to launch anyway. This may produce undesired results."
-        ui.info("")
-      end
     end
   end
 end

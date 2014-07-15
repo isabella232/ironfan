@@ -5,7 +5,7 @@ require IRONFAN_DIR("lib/ironfan")
 describe "ironfan" do
   describe 'successfuly runs example' do
 
-    describe 'webserver_demo:' do
+    describe 'cluster with ec2 provider:' do
       before :all do
         @cluster = get_example_cluster(:webserver_demo)
         @cluster.resolve!
@@ -170,6 +170,53 @@ describe "ironfan" do
           }
         end
       end
+    end
+
+    describe 'cluster with vsphere provider:' do
+      before :all do
+        @cluster = get_example_cluster(:hadoopcluster)
+        @cluster.resolve!
+      end
+
+      it 'loads successfuly' do
+        @cluster.should be_a(Ironfan::Cluster)
+        @cluster.name.should == :hadoopcluster
+      end
+    end
+  end
+
+  describe 'core module:' do
+
+    before :all do
+      require 'ironfan'
+      Ironfan.ui = Chef::Knife.ui
+    end
+
+    it 'clean up clusters' do
+      Ironfan.cluster_filenames.length.should > 0 # files in :cluster_path
+      Ironfan.clusters.length.should > 0
+      Ironfan.clear_clusters
+      Ironfan.clusters.should == {}
+    end
+
+    it 'load a cluster after clean up' do
+      c = Ironfan.load_cluster('webserver_demo')
+      c.should be_a(Ironfan::Cluster)
+      c.name.should == :webserver_demo
+    end
+
+    it 'call Ironfan.die will exit with the specified status code' do
+      begin
+        Ironfan.die('exit with code 3', 3)
+      rescue SystemExit => e
+        e.status.should == 3
+      end
+    end
+
+    it 'call Ironfan.safely will catch any exception' do
+      Ironfan.safely do
+        raise 'raise exception in safely block'
+      end.should_not raise_error
     end
 
   end

@@ -29,9 +29,12 @@ Spork.prefork do # This code is run only once when the spork server is started
     # So filter them out of coverage report.
     add_filter "lib/ironfan/ec2/"
     add_filter "lib/ironfan/vsphere/"
+    add_filter "lib/ironfan/common/server_slice.rb"
     add_filter "lib/ironfan/private_key.rb"
     add_filter "lib/ironfan/security_group.rb"
+    add_filter "lib/ironfan/role_implications.rb"
     add_filter "lib/ironfan/deprecated.rb"
+    add_filter "lib/ironfan/volume.rb"
   end
 
   # Requires custom matchers & macros, etc from files in ./spec_helper/
@@ -39,6 +42,8 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   def initialize_ironfan
     require IRONFAN_DIR('spec/spec_helper/partial_search')
+    require 'ironfan'
+    Ironfan.ui = Chef::Knife.ui
   end
 
   def load_example_cluster(name)
@@ -50,33 +55,41 @@ Spork.prefork do # This code is run only once when the spork server is started
     Ironfan.load_cluster(name)
   end
 
-  def get_knife_create
-    require IRONFAN_DIR("lib/chef/knife/cluster_create")
-    knife = Chef::Knife::ClusterCreate.new
-    knife.class.load_deps
-    knife.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
-    knife.config[:yes] = true
-    knife.config[:bootstrap] = true
-    knife.config[:skip] = true
-    knife.config[:dry_run] = true
-    knife.config[:verbosity] = 1
-    knife.name_args = ['hadoop_cluster_test']
-    knife.load_ironfan
-    knife
+  def knife_cluster_name
+    'hadoop_cluster_test'
   end
 
-  def get_knife_kill
-    require IRONFAN_DIR("lib/chef/knife/cluster_kill")
-    knife = Chef::Knife::ClusterKill.new
+  def set_cluster_state(cluster_name, state)
+    cluster = get_example_cluster(knife_cluster_name)
+    cluster.cloud.fog_connection.servers.all.each do |svr|
+      puts '-------' + svr.state
+      svr.state = state
+      puts '-------' + svr.state
+    end
+  end
+
+  def stop_cluster(cluster_name)
+    set_cluster_state(cluster_name, 'Powered Off')
+  end
+
+  def get_knife action
+    action = action.to_s
+    require IRONFAN_DIR("lib/chef/knife/cluster_#{action}")
+    knife = eval("Chef::Knife::Cluster#{action.capitalize}.new")
     knife.class.load_deps
     knife.config[:from_file] = IRONFAN_DIR('spec/data/cluster_definition.json')
     knife.config[:yes] = true
     knife.config[:skip] = true
     knife.config[:dry_run] = true
-    knife.config[:chef] = true
-    knife.config[:cloud] = false
     knife.config[:verbosity] = 1
-    knife.name_args = ['hadoop_cluster_test']
+    if ['create', 'launch', 'start'].include?(action)
+      knife.config[:bootstrap] = true
+    end
+    if ['kill'].include?(action)
+      knife.config[:cloud] = true
+      knife.config[:chef] = true
+    end
+    knife.name_args = [knife_cluster_name]
     knife.load_ironfan
     knife
   end

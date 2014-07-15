@@ -51,7 +51,7 @@ module Ironfan
 
       Chef::Log::Formatter.show_time = true # initialize logger
 
-      initialize_ironfan_broker(config[:from_file]) if config[:from_file] # for :vsphere cloud
+      initialize_ironfan_broker(config[:from_file]) if config[:from_file] # for :static cloud
     end
 
     def initialize_ironfan_broker(config_file)
@@ -200,6 +200,7 @@ module Ironfan
       end
     end
 
+=begin this function is not used now
     # Show a pretty progress bar while we wait for a set of threads to finish.
     def progressbar_for_threads(threads)
       section "Waiting for servers:"
@@ -220,6 +221,7 @@ module Ironfan
       threads.each(&:join)
       ui.info ''
     end
+=end
 
     def bootstrapper(server, hostname)
       bootstrap = Chef::Knife::Bootstrap.new

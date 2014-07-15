@@ -5,20 +5,22 @@ Ironfan.cluster :vsphere, "hadoopcluster" do
     flavor "default"
   end
 
+  role "hadoop"
+
   facet :master do
     instances 1
-    
+
     role "hadoop_namenode"
     role "hadoop_jobtracker"
   end
-  
+
   facet :worker do
     instances 3
     
     role "hadoop_datanode"
     role "hadoop_tasktracker"
   end
-  
+
   facet :client do
     instances 1
     
@@ -26,7 +28,6 @@ Ironfan.cluster :vsphere, "hadoopcluster" do
     role "hive"
     role "pig"
   end
-
 
   hadoop_distro "apache"
 
