@@ -160,19 +160,28 @@ end
     #
     # Save cluster meta info into the cluster definition file.
     #
-    # @param [String] filename -- the full path of the file into which to save cluster meta info.
-    #
     # @return [Ironfan::Cluster] the cluster.
     #
-    def save(filename = nil)
-      filename ||= File.join(Ironfan.cluster_path.first, "#{cluster_name}.rb")
-      Chef::Log.debug("Writing cluster meta info into #{filename}")
+    def save
+      filename = cluster_file_name(cluster_name)
+      Chef::Log.debug("Write cluster meta info into #{filename}")
       File.open(filename, 'w').write(render)
 
       self
     end
 
+    # Delete the cluster definition file
+    def delete
+      filename = cluster_file_name(cluster_name)
+      Chef::Log.debug("Delete cluster definition file #{filename}")
+      File.delete(filename)
+    end
+
   protected
+
+    def cluster_file_name(cluster_name)
+      File.join(Ironfan.cluster_path.first, "#{cluster_name}.rb")
+    end
 
     # Creates a chef role named for the cluster
     def create_cluster_role

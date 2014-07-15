@@ -55,8 +55,13 @@ class Chef
 
         if config[:chef]
           section("Deleting Chef Nodes")
-          ret = target.select(&:in_chef? ).delete_chef
+          ret = target.select(&:in_chef?).delete_chef
           die('Deleting Chef Nodes of cluster failed. Abort!', DELETE_FAILURE) if !ret
+        end
+
+        # delete cluster def file
+        if cluster_name == target_name
+          cluster.delete
         end
 
         section("Deleting cluster #{target_name} completed.")
