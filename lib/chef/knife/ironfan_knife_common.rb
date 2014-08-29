@@ -258,8 +258,6 @@ module Ironfan
           ret = bs.run
         rescue StandardError => e
           ui.error "Error thrown when bootstrapping #{nodename} : #{e}"
-          ui.error e.backtrace.pretty_inspect
-          ui.error "Node data is : #{node.pretty_inspect}"
           ret = BOOTSTRAP_FAILURE
         end
       end
