@@ -1,3 +1,9 @@
+# 2.1.0 (2014-9-15)
+
+* Remove unnecessary Chef API calls and disable some Ohai plugins to improve Chef performance
+* Add more UT
+* Some minor enhancement
+
 # 2.0.0 (2014-4-1)
 
 * Rename gem to ironfan_serengeti
