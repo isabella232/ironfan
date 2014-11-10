@@ -51,6 +51,7 @@ Spork.prefork do # This code is run only once when the spork server is started
   end
 
   def get_example_cluster name
+    name = name.to_s
     load_example_cluster(name)
     Ironfan.load_cluster(name)
   end
