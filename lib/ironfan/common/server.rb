@@ -49,6 +49,7 @@ module Ironfan
         mount_point_to_device = {}
         device_to_disk = {}
         swap_disk = nil
+        i = 1
         fog_server.volumes.each do |disk|
           if disk.start_with?("DATA")
             # disk uuid fetch from WS is: DATA:6000C298-2b5d-f41a-2581-1b07e74971e8
@@ -57,9 +58,10 @@ module Ironfan
             uuid_in_os = "scsi-3" + disk.split(":")[1].gsub("-", "").downcase
             raw_disk = "/dev/disk/by-id/" + uuid_in_os
             device = "/dev/disk/by-id/" + uuid_in_os + "-part1"
-            mount_point = '/mnt/' + uuid_in_os + "-part1"
+            mount_point = "/mnt/data#{i}"
             mount_point_to_device[mount_point] = device
             device_to_disk[device] = raw_disk
+            i += 1
           else
             swap_disk = "/dev/disk/by-id/scsi-3" + disk.split(":")[1].gsub("-", "").downcase
           end
