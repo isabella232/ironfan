@@ -49,7 +49,7 @@ module Ironfan
         mount_point_to_device = {}
         device_to_disk = {}
         swap_disk = nil
-        i = 1
+        i = 0
         fog_server.volumes.each do |disk|
           if disk.start_with?("DATA")
             # disk uuid fetch from WS is: DATA:6000C298-2b5d-f41a-2581-1b07e74971e8
