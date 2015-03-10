@@ -274,8 +274,10 @@ module Ironfan
       # 2. hadoop namenode daemon is down before bootstrap the cluster
       # and hbase master/regionserver daemons require hadoop namenode daemon is running on the same or another VM,
       # so starting hbase daemons will fail when hadoop namenode daemon is down.
-      # solution is: clear registry entries before bootstrapping cluster.
-      target.clear_service_registry_entries
+      # solution is: clear registry entries before bootstrapping cluster when in cluster start or bootstrap.
+      if ['start', 'bootstrap'].include?(target.cluster.action)
+        target.clear_service_registry_entries
+      end
 
       target_name = target.name
       section("Start bootstrapping nodes in cluster #{target_name} at #{Time.now}")

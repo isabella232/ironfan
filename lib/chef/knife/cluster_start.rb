@@ -46,8 +46,10 @@ class Chef
         die('Starting cluster failed. Abort!', START_FAILURE) if !ret
 
         # Sync vm ip, vm attached disks, vm rack and other info to Chef
-        section("Sync'ing to chef after cluster VMs are started")
-        target.sync_to_chef
+        if target.cloud.name != :static
+          section("Sync'ing to chef after cluster VMs are started")
+          target.sync_to_chef
+        end
 
         exit_status = 0
         if config[:bootstrap]

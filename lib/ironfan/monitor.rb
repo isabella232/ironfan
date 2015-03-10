@@ -43,6 +43,7 @@ module Ironfan
     ]
 
     def start_monitor_bootstrap(target)
+      return if is_monitor_initialized(target)
       Chef::Log.info("Initialize monitoring bootstrap progress of cluster #{target.name}")
       nodes = cluster_nodes(target)
       nodes.each do |node|
@@ -66,6 +67,7 @@ module Ironfan
     end
 
     def start_monitor_progess(target)
+      return if is_monitor_initialized(target)
       Chef::Log.info("Initialize monitoring progress of cluster #{target.name}")
       nodes = cluster_nodes(target)
       nodes.each do |node|
@@ -78,6 +80,15 @@ module Ironfan
         set_provision_attrs(node, attrs)
         node.save
       end
+    end
+
+    def is_monitor_initialized(target)
+      # when using static cloud provider, the monitor is already initialized.
+      if target.cloud.name == :static
+        Chef::Log.info("Skip monitoring initialization because it's static cloud provider.")
+        return true
+      end
+      return false
     end
 
     def monitor_iaas_action_progress(target, progress, is_last_action = false)

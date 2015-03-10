@@ -67,8 +67,11 @@ class Chef
         die('Creating cluster VMs failed. Abort!', CREATE_FAILURE) if !ret
 
         # Sync vm ip, vm attached disks, vm rack and other info to Chef
-        section("Sync'ing to chef after cluster VMs are created")
-        target.sync_to_chef
+        # when using static cloud provider, all data are already synced to Chef Server when creating the servers
+        if target.cloud.name != :static
+          section("Sync'ing to chef after cluster VMs are created")
+          target.sync_to_chef
+        end
 
         exit_status = 0
         if config[:bootstrap]
