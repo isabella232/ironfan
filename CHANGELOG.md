@@ -1,3 +1,7 @@
+# 2.2.0 (2015-5-8)
+
+* Some enhancement
+
 # 2.1.0 (2014-9-15)
 
 * Remove unnecessary Chef API calls and disable some Ohai plugins to improve Chef performance
