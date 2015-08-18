@@ -259,6 +259,8 @@ module Ironfan
         rescue StandardError => e
           ui.error "Error thrown when bootstrapping #{nodename} : #{e}"
           ret = BOOTSTRAP_FAILURE
+        rescue SystemExit => e
+          ret = e.status
         end
       end
 
@@ -445,12 +447,14 @@ module Ironfan
   end
 end
 
-#
+# Chef 12 already contains this monkey patch, so it's not needed any more.
+# 
 # Override the methods in Chef::Knife::Ssh to return the exit value of SSH command
 #
 # Need to explicitly require 'chef/knife/ssh' to ensure the methods defined here override the original one defined in 'chef/knife/ssh',
 # because occasionally rubygem loads this file before the original 'chef/knife/ssh', then the overridden won't happen.
 #
+=begin
 require 'chef/knife/ssh'
 
 class Chef
@@ -513,3 +517,4 @@ class Chef
     end
   end
 end
+=end

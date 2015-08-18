@@ -119,7 +119,7 @@ module Ironfan
     end
 
     def monitor_bootstrap_progress(target, svr, exit_code)
-      Chef::Log.info("Monitoring bootstrap progress of cluster #{target.name} with data: #{[exit_code, svr]}")
+      Chef::Log.info("Monitoring bootstrap progress of cluster #{target.name} with data: #{[exit_code, svr.fullname]}")
 
       # Save progress data to ChefNode
       node = Chef::Node.load(svr.fullname)

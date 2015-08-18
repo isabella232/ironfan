@@ -297,8 +297,9 @@ module Ironfan
       # ApiClient#create sends extra params that fail -- we'll do it ourselves
       # purposefully *not* catching the 'but it already exists' error: if it
       # didn't show up in the discovery process, we're in an inconsistent state
-      response = chef_api_server_as_admin.post_rest("clients", { 'name' => fullname, 'admin' => false, 'private_key' => true })
-      client_key.body = response['private_key']
+      response = chef_api_server_as_admin.post_rest("clients", { 'name' => fullname, 'admin' => false, 'create_key' => true }) # use 'private_key' => true in Chef Server 10 and 11
+      #client_key.body = response['private_key'] # use this in Chef Server 10 and 11
+      client_key.body = response['chef_key']['private_key'] # use this in Chef Server 12
       client_key.save
       @chef_client
     end

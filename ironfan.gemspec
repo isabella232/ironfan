@@ -24,8 +24,8 @@ Gem::Specification.new do |s|
   s.files = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- {spec,tests}/*`.split("\n")
 
-  s.add_dependency(%q<chef>, ["~> 11.4"])
-  s.add_dependency(%q<formatador>, ["~> 0.2.1"])
-  s.add_dependency(%q<gorillib>, ["~> 0.1.7"])
+  s.add_dependency(%q<chef>)
+  s.add_dependency(%q<formatador>)
+  s.add_dependency(%q<gorillib>)
 end
 
