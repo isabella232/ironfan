@@ -41,7 +41,6 @@ Spork.prefork do # This code is run only once when the spork server is started
   Dir[IRONFAN_DIR("spec/spec_helper/*.rb")].each {|f| require f}
 
   def initialize_ironfan
-    require IRONFAN_DIR('spec/spec_helper/partial_search')
     require 'ironfan'
     Ironfan.ui = Chef::Knife.ui
   end
@@ -124,6 +123,9 @@ Spork.prefork do # This code is run only once when the spork server is started
 
   # Configure rspec
   RSpec.configure do |config|
+    config.expect_with :rspec do |c|
+      c.syntax = [:should, :expect]
+    end
   end
 end
 

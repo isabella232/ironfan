@@ -116,7 +116,6 @@ describe "ironfan" do
       describe 'resolving servers gets right' do
         before do
           @server = @cluster.slice(:webnode, 5).first
-          @server.cloud.stub(:validation_key).and_return("I_AM_VALID")
           @server.resolve!
         end
 
@@ -214,9 +213,11 @@ describe "ironfan" do
     end
 
     it 'call Ironfan.safely will catch any exception' do
-      Ironfan.safely do
-        raise 'raise exception in safely block'
-      end.should_not raise_error
+      expect {
+        Ironfan.safely do
+          raise 'raise exception in safely block'
+        end
+      }.to_not raise_error
     end
 
   end

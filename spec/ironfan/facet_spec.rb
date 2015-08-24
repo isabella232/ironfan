@@ -53,8 +53,8 @@ describe Ironfan::Facet do
     it 'with an array does not create new dummy servers' do
       facet.server(69)
       facet.slice( [3, 1, 69, 0, 75, 123] ).map(&:facet_index).should == [0, 1, 3, 69]
-      facet.has_server?(75).should be_false
-      facet.has_server?(69).should be_true
+      facet.has_server?(75).should be false
+      facet.has_server?(69).should be true
     end
 
     it 'with a string, converts to intervals' do
