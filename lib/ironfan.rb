@@ -175,6 +175,7 @@ module Ironfan
     cluster = Ironfan.cluster(cloud_provider_name, cluster_name)
     cluster.cloud cloud_provider_name
     cluster.cloud.flavor 'default' # FIXME: should not be hard coded in future
+    cluster.cloud.image_name 'centos'
 
     cluster_def.each do |key, value|
       case key
@@ -183,9 +184,8 @@ module Ironfan
         cluster.cluster_role do
           override_attributes({ :hadoop => { :distro_name => cluster.hadoop_distro,  :distro_vendor => cluster_def['distro_vendor'], :distro_version => cluster_def['distro_version'] } })
         end
-      when 'template_id'
-        # cluster.cloud.image_name value
-        cluster.cloud.image_name 'centos5' # FIXME: should not be hard coded in future
+      when 'template_osfamily'
+        cluster.cloud.image_name value
       when 'flavor'
         cluster.cloud.flavor value
       when 'roles'

@@ -44,8 +44,9 @@ module Ironfan
 
       # :bootstrap_distro is the name of bootstrap template file defined in Ironfan
       IMAGE_INFO =  {
-        # CentOS 5 x86_64
-        %w[ 64-bit  centos5 ] => { :bootstrap_distro => "centos5-vmware" },
+        # CentOS 5/6 x86_64
+        %w[ 64-bit  centos ] => { :bootstrap_distro => "centos-vmware" },
+        %w[ 64-bit  redhat ] => { :bootstrap_distro => "centos-vmware" },
       }
     end
   end
