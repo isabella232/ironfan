@@ -23,7 +23,7 @@ describe Ironfan do
 
     it 'cluster cloud is correct' do
       cloud = @cluster.cloud
-      cloud.image_name.should == "centos5"
+      cloud.image_name.should == "centos"
       cloud.flavor.should == "default"
     end
 
