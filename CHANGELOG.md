@@ -1,3 +1,8 @@
+# 2.3.0 (2015-9-28)
+
+* Enhancement for multi template support
+* Compatible with Chef 12
+
 # 2.2.0 (2015-5-8)
 
 * Some enhancement
